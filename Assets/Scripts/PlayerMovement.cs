@@ -42,6 +42,13 @@ public class PlayerMovement : MonoBehaviour
             yield return new WaitForSeconds(stepDelay);
         }
 
+        Tile tile = tiles[currentTile].GetComponent<Tile>();
+
+        if (tile != null)
+        {
+            tile.OnPlayerLanded();
+        }
+
         isMoving = false; 
     }
 }
