@@ -1,40 +1,50 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Camera))]
-public class CameraAspectFix : MonoBehaviour
+public class CameraOrbit : MonoBehaviour
 {
-    public float targetAspect = 16f / 9f;
+    public Transform cam;
+
+    public float rotationSpeed = 150f;
+
+    public float zoomSpeed = 10f;
+    public float minFOV = 30f;
+    public float maxFOV = 180f;
+
+    private Camera cameraComponent;
 
     void Start()
     {
-        Camera cam = GetComponent<Camera>();
+        cameraComponent = cam.GetComponent<Camera>();
+    }
 
-        float windowAspect = (float)Screen.width / Screen.height;
-        float scaleHeight = windowAspect / targetAspect;
+    void Update()
+    {
+        if (IsUIOpen()) return;
 
-        if (scaleHeight < 1.0f)
+        Rotate();
+        Zoom();
+    }
+
+    bool IsUIOpen()
+    {
+        UIManager ui = FindObjectOfType<UIManager>();
+        return ui != null && ui.isPanelOpen;
+    }
+
+    void Rotate()
+    {
+        if (Input.GetMouseButton(1)) 
         {
-            Rect rect = cam.rect;
-
-            rect.width = 1.0f;
-            rect.height = scaleHeight;
-            rect.x = 0;
-            rect.y = (1.0f - scaleHeight) / 2.0f;
-
-            cam.rect = rect;
+            float mouseX = Input.GetAxis("Mouse X");
+            transform.Rotate(Vector3.up, mouseX * rotationSpeed * Time.deltaTime);
         }
-        else
-        {
-            float scaleWidth = 1.0f / scaleHeight;
+    }
 
-            Rect rect = cam.rect;
+    void Zoom()
+    {
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
 
-            rect.width = scaleWidth;
-            rect.height = 1.0f;
-            rect.x = (1.0f - scaleWidth) / 2.0f;
-            rect.y = 0;
-
-            cam.rect = rect;
-        }
+        cameraComponent.fieldOfView -= scroll * zoomSpeed ;
+        cameraComponent.fieldOfView = Mathf.Clamp(cameraComponent.fieldOfView, minFOV, maxFOV);
     }
 }
