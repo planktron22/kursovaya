@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
@@ -69,5 +70,12 @@ public class UIManager : MonoBehaviour
         ultraUnluckPanel.SetActive(false);
 
         isPanelOpen = false;
+    }
+
+
+    // назад в меню
+    public void BackToMenu()
+    {
+        SceneManager.LoadScene("MainMenuScene");
     }
 }
