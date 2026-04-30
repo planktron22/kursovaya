@@ -11,6 +11,7 @@ public class PlayerStatsInfo : MonoBehaviour
     public Text freeTimeText;
     public Text healthText;
     public Text moodText;
+    public Text ageText;
 
     private CultureInfo culture = new CultureInfo("ru-RU");
 
@@ -23,6 +24,7 @@ public class PlayerStatsInfo : MonoBehaviour
         freeTimeText.text = Format(stats.FreeTime) + " ч.";
         healthText.text = Format(stats.Health) + "/100";
         moodText.text = Format(stats.Mood)+"/100";
+        ageText.text = Format(stats.Age) + " лет";
     }
 
     string Format(int value)

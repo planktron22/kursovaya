@@ -9,6 +9,13 @@ public class PlayerMovement : MonoBehaviour
     public bool isMoving = false;
     public float stepDelay = 0.1f;
 
+    private PlayerStats stats;
+
+    void Start()
+    {
+        stats = GetComponent<PlayerStats>();
+    }
+
     public void Move(int steps)
     {
         if (!isMoving)
@@ -23,7 +30,16 @@ public class PlayerMovement : MonoBehaviour
 
         for (int i = 0; i < steps; i++)
         {
+            int previousTile = currentTile;
+
             currentTile = (currentTile + 1) % tiles.Length;
+
+            //  год
+            if (previousTile == tiles.Length - 1 && currentTile == 0)
+            {
+                Debug.Log("Пройден полный круг!");
+                stats.DecreaseAge();
+            }
 
             Vector3 targetPos = tiles[currentTile].position;
 
@@ -39,16 +55,26 @@ public class PlayerMovement : MonoBehaviour
             }
 
             transform.position = targetPos;
+
+            //  период
+            Tile tile = tiles[currentTile].GetComponent<Tile>();
+
+            if (tile != null && tile.tileType == TileType.Period)
+            {
+                stats.ApplyPeriod();
+            }
+
             yield return new WaitForSeconds(stepDelay);
         }
 
-        Tile tile = tiles[currentTile].GetComponent<Tile>();
+        // финальный тайл
+        Tile finalTile = tiles[currentTile].GetComponent<Tile>();
 
-        if (tile != null)
+        if (finalTile != null)
         {
-            tile.OnPlayerLanded();
+            finalTile.OnPlayerLanded();
         }
 
-        isMoving = false; 
+        isMoving = false;
     }
 }

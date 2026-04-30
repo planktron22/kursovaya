@@ -62,12 +62,12 @@ public class UIManager : MonoBehaviour
 
     public void HideAll()
     {
-        communityPanel.SetActive(false);
-        studyingPanel.SetActive(false);
-        luckPanel.SetActive(false);
-        unluckPanel.SetActive(false);
-        ultraLuckPanel.SetActive(false);
-        ultraUnluckPanel.SetActive(false);
+        if (communityPanel) communityPanel.SetActive(false);
+        if (studyingPanel) studyingPanel.SetActive(false);
+        if (luckPanel) luckPanel.SetActive(false);
+        if (unluckPanel) unluckPanel.SetActive(false);
+        if (ultraLuckPanel) ultraLuckPanel.SetActive(false);
+        if (ultraUnluckPanel) ultraUnluckPanel.SetActive(false);
 
         isPanelOpen = false;
     }
