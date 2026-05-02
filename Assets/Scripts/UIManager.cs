@@ -10,6 +10,10 @@ public class UIManager : MonoBehaviour
     public GameObject ultraLuckPanel;
     public GameObject ultraUnluckPanel;
     public GameObject pausePanel;
+    public GameObject opportunityPanel;
+
+    public PlayerMovement playerMovement;
+    public UnityEngine.UI.Button opportunityButton;
 
     public bool isPanelOpen = false;
     public void ShowPanel(TileType type)
@@ -60,6 +64,34 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void ToggleOpportunity()
+    {
+        if (playerMovement == null) return;
+
+        if (playerMovement.isMoving)
+        {
+            Debug.Log("Ќельз€ открыть во врем€ движени€");
+            return;
+        }
+
+        if (playerMovement.GetCurrentTileType() != TileType.Empty)
+        {
+            Debug.Log("ћожно открыть только на пустой клетке");
+            return;
+        }
+
+        if (opportunityPanel.activeSelf)
+        {
+            opportunityPanel.SetActive(false);
+            isPanelOpen = false;
+        }
+        else
+        {
+            opportunityPanel.SetActive(true);
+            isPanelOpen = true;
+        }
+    }
+
     public void HideAll()
     {
         if (communityPanel) communityPanel.SetActive(false);
@@ -72,10 +104,20 @@ public class UIManager : MonoBehaviour
         isPanelOpen = false;
     }
 
-
-    // назад в меню
     public void BackToMenu()
     {
         SceneManager.LoadScene("MainMenuScene");
+    }
+
+    void Update()
+    {
+        if (playerMovement == null || opportunityButton == null)
+            return;
+
+        bool canOpen =
+            !playerMovement.isMoving &&
+            playerMovement.GetCurrentTileType() == TileType.Empty &&
+            !isPanelOpen;
+
     }
 }

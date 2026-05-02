@@ -77,4 +77,14 @@ public class PlayerMovement : MonoBehaviour
 
         isMoving = false;
     }
+
+    public TileType GetCurrentTileType()
+    {
+        Tile tile = tiles[currentTile].GetComponent<Tile>();
+
+        if (tile != null)
+            return tile.tileType;
+
+        return TileType.Empty;
+    }
 }
