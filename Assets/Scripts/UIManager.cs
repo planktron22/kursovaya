@@ -11,6 +11,7 @@ public class UIManager : MonoBehaviour
     public GameObject ultraUnluckPanel;
     public GameObject pausePanel;
     public GameObject opportunityPanel;
+    public GameObject jobPanel;
 
     public PlayerMovement playerMovement;
     public UnityEngine.UI.Button opportunityButton;
@@ -109,6 +110,20 @@ public class UIManager : MonoBehaviour
         SceneManager.LoadScene("MainMenuScene");
     }
 
+
+    public void ToggleJobs()
+    {
+        if (jobPanel.activeSelf)
+        {
+            jobPanel.SetActive(false);
+            isPanelOpen = false;
+        }
+        else
+        {
+            jobPanel.SetActive(true);
+            isPanelOpen = true;
+        }
+    }
     void Update()
     {
         if (playerMovement == null || opportunityButton == null)

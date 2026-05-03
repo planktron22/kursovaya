@@ -1,25 +1,36 @@
-using UnityEngine;
+п»їusing UnityEngine;
+using System.Collections.Generic;
 
 public class PlayerStats : MonoBehaviour
 {
+    // --- РћРЎРќРћР’РќР«Р• ---
     public int Balance;
-
-    public int Income;
     public int Loss;
     public int FreeTime;
     public int Health;
     public int Mood;
     public int Age;
 
-    public int NetIncome => Income - Loss;
+    // --- Р­РљРћРќРћРњРРљРђ ---
+    public int TotalIncome;
+    public int TotalLoss;
 
+    public int NetIncome => TotalIncome - TotalLoss;
+
+    // --- Р РђР‘РћРўР« ---
+    public List<PlayerJob> activeJobs = new List<PlayerJob>();
+
+    // --- UI ---
     private PlayerStatsInfo statsUI;
+    private JobListUI jobListUI;
 
     void Start()
     {
         statsUI = FindObjectOfType<PlayerStatsInfo>();
+        jobListUI = FindObjectOfType<JobListUI>();
 
         ApplyDifficulty();
+        RecalculateIncome();
         UpdateUI();
     }
 
@@ -31,25 +42,22 @@ public class PlayerStats : MonoBehaviour
         {
             case 0:
                 Balance = 500000;
-                Income = 80000;
                 Loss = 55000;
-                FreeTime = 100;
+                FreeTime = 500;
                 Age = 40;
                 break;
 
             case 1:
                 Balance = 200000;
-                Income = 50000;
                 Loss = 45000;
-                FreeTime = 70;
+                FreeTime = 500;
                 Age = 30;
                 break;
 
             case 2:
                 Balance = 150000;
-                Income = 40000;
                 Loss = 50000;
-                FreeTime = 40;
+                FreeTime = 500;
                 Age = 25;
                 break;
         }
@@ -61,63 +69,100 @@ public class PlayerStats : MonoBehaviour
     public void UpdateUI()
     {
         if (statsUI != null)
-        {
             statsUI.UpdateStats(this);
+    }
+
+    // --- РџР•Р Р•РЎР§РЃРў Р”РћРҐРћР”Рђ ---
+    void RecalculateIncome()
+    {
+        TotalIncome = 0;
+
+        foreach (var job in activeJobs)
+        {
+            TotalIncome += CalculateJobIncome(job.jobData);
         }
+
+        TotalLoss = Loss;
     }
 
-    // --- изменения параметров ---
-
-    public void ChangeBalance(int value)
-    {
-        Balance += value;
-        UpdateUI();
-    }
-
-    public void AddIncome(int value)
-    {
-        Income += value;
-        UpdateUI();
-    }
-
-    public void AddLoss(int value)
-    {
-        Loss += value;
-        UpdateUI();
-    }
-
-    public void ChangeFreeTime(int value)
-    {
-        FreeTime += value;
-        UpdateUI();
-    }
-
-    public void ChangeHealth(int value)
-    {
-        Health += value;
-        UpdateUI();
-    }
-
-    public void ChangeMood(int value)
-    {
-        Mood += value;
-        UpdateUI();
-    }
-
-    // период
+    // --- РџР•Р РРћР” ---
     public void ApplyPeriod()
     {
+        RecalculateIncome();
+
         Balance += NetIncome;
+
+        Debug.Log($"РџРµСЂРёРѕРґ: +{TotalIncome} / -{TotalLoss} / Р‘Р°Р»Р°РЅСЃ {Balance}");
+
         UpdateUI();
     }
 
-    //  год 
+    // --- Р“РћР” ---
     public void DecreaseAge()
     {
         Age -= 1;
+        UpdateUI();
+    }
 
-        Debug.Log("Прошел год. Осталось лет: " + Age);
+    // --- Р РђРЎР§РЃРў Р”РћРҐРћР”Рђ ---
+    public int CalculateJobIncome(OpportunityData job)
+    {
+        int baseIncome = job.jobIncomePerHour * job.jobHours;
+
+        int min = job.jobBonusMin / 50;
+        int max = job.jobBonusMax / 50;
+
+        int bonusIncome = 0;
+
+        for (int i = 0; i < job.jobHours; i++)
+        {
+            int randomStep = Random.Range(min, max + 1) * 50;
+            bonusIncome += randomStep;
+        }
+
+        return baseIncome + bonusIncome;
+    }
+
+    // --- РќРђР™Рњ ---
+    public void ApplyJob(OpportunityData job)
+    {
+        foreach (var j in activeJobs)
+        {
+            if (j.title == job.title)
+                return;
+        }
+
+        if (FreeTime < job.jobHours)
+            return;
+
+        activeJobs.Add(new PlayerJob
+        {
+            title = job.title,
+            timeCost = job.jobHours,
+            jobData = job
+        });
+
+        FreeTime -= job.jobHours;
+
+        RecalculateIncome();
 
         UpdateUI();
+
+        if (jobListUI != null)
+            jobListUI.GenerateList();
+    }
+
+    // --- РЈР’РћР›Р¬РќР•РќРР• (РїРѕР·Р¶Рµ) ---
+    public void RemoveJob(PlayerJob job)
+    {
+        if (activeJobs.Contains(job))
+        {
+            activeJobs.Remove(job);
+            FreeTime += job.timeCost;
+
+            RecalculateIncome();
+
+            UpdateUI();
+        }
     }
 }
