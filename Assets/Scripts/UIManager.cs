@@ -12,6 +12,9 @@ public class UIManager : MonoBehaviour
     public GameObject pausePanel;
     public GameObject opportunityPanel;
     public GameObject jobPanel;
+    public GameObject businessPanel;
+    public GameObject realtyPanel;
+    public GameObject investPanel;
 
     public PlayerMovement playerMovement;
     public UnityEngine.UI.Button opportunityButton;
@@ -124,6 +127,48 @@ public class UIManager : MonoBehaviour
             isPanelOpen = true;
         }
     }
+
+    public void ToggleBusinesses()
+    {
+        if (businessPanel.activeSelf)
+        {
+            businessPanel.SetActive(false);
+            isPanelOpen = false;
+        }
+        else
+        {
+            businessPanel.SetActive(true);
+            isPanelOpen = true;
+        }
+    }
+    public void ToggleRealty()
+    {
+        if (realtyPanel.activeSelf)
+        {
+            realtyPanel.SetActive(false);
+            isPanelOpen = false;
+        }
+        else
+        {
+            realtyPanel.SetActive(true);
+            isPanelOpen = true;
+        }
+    }
+
+    public void ToggleInvest()
+    {
+        if (investPanel.activeSelf)
+        {
+            investPanel.SetActive(false);
+            isPanelOpen = false;
+        }
+        else
+        {
+            investPanel.SetActive(true);
+            isPanelOpen = true;
+        }
+    }
+
     void Update()
     {
         if (playerMovement == null || opportunityButton == null)

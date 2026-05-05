@@ -47,9 +47,24 @@ public class PlayerStatsInfo : MonoBehaviour
             GameObject obj = Instantiate(jobTextPrefab, jobsIncomeContainer);
             Text text = obj.GetComponent<Text>();
 
-            int income = stats.CalculateJobIncome(job.jobData);
+            if (job.isBusiness)
+            {
+                int remaining = job.startDelay - job.currentDelay;
 
-            text.text = job.title + " + " + Format(income);
+                if (remaining > 0)
+                {
+                    text.text = $"{job.title} + 0 (старт через {remaining})";
+                }
+                else
+                {
+                    text.text = $"{job.title} + {Format(job.jobData.businessIncome)}";
+                }
+            }
+            else
+            {
+                int income = stats.CalculateJobIncome(job.jobData);
+                text.text = $"{job.title} + {Format(income)}";
+            }
         }
     }
 

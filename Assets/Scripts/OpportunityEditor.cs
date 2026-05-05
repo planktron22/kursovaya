@@ -30,18 +30,19 @@ public class OpportunityEditor : Editor
             case OpportunityType.Business:
                 data.businessCost = EditorGUILayout.IntField("Вложения", data.businessCost);
                 data.businessIncome = EditorGUILayout.IntField("Доход", data.businessIncome);
-                data.businessStartTime = EditorGUILayout.IntField("Время старта (месяцы)", data.businessStartTime);
+                data.businessStartTime = EditorGUILayout.IntField("Время старта (периоды)", data.businessStartTime);
                 data.businessTimeCost = EditorGUILayout.IntField("Затраты времени", data.businessTimeCost);
                 break;
 
-            case OpportunityType.Investment:
-                data.investmentRisk = EditorGUILayout.IntSlider("Риск", data.investmentRisk, 1, 10);
+            case OpportunityType.Invest:
+                data.investCost = EditorGUILayout.IntField("Цена за акцию", data.investCost);
+                data.investRisk = EditorGUILayout.IntSlider("Риск", data.investRisk, 1, 5);
                 break;
 
-            case OpportunityType.RealEstate:
-                data.realEstateCost = EditorGUILayout.IntField("Стоимость", data.realEstateCost);
-                data.realEstateIncome = EditorGUILayout.IntField("Доход", data.realEstateIncome);
-                data.realEstateTimeCost = EditorGUILayout.IntField("Затраты времени", data.realEstateTimeCost);
+            case OpportunityType.Realty:
+                data.realtyCost = EditorGUILayout.IntField("Стоимость", data.realtyCost);
+                data.realtyIncome = EditorGUILayout.IntField("Доход", data.realtyIncome);
+                data.realtyTimeCost = EditorGUILayout.IntField("Затраты времени", data.realtyTimeCost);
                 break;
         }
 

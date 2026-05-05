@@ -4,8 +4,8 @@ public enum OpportunityType
 {
     Job,
     Business,
-    Investment,
-    RealEstate
+    Invest,
+    Realty
 }
 
 [CreateAssetMenu(fileName = "New Opportunity", menuName = "Game/Opportunity")]
@@ -30,10 +30,11 @@ public class OpportunityData : ScriptableObject
     public int businessTimeCost;
 
     // --- Инвестиции ---
-    public int investmentRisk; 
+    public int investCost;
+    public int investRisk; // 1-5
 
     // --- Недвижимость ---
-    public int realEstateCost;
-    public int realEstateIncome;
-    public int realEstateTimeCost;
+    public int realtyCost;
+    public int realtyIncome;
+    public int realtyTimeCost;
 }
