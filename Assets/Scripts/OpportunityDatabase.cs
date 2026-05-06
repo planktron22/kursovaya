@@ -6,4 +6,6 @@ public class OpportunityDatabase : MonoBehaviour
     public OpportunityData[] businesses;
     public OpportunityData[] realty;
     public OpportunityData[] invests;
+
+    public SkillData[] skills;
 }

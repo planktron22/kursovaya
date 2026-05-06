@@ -15,6 +15,7 @@ MonoBehaviour:
   title: "\u0410\u0432\u0442\u043E\u043C\u043E\u0439\u043A\u0430"
   description: "\u0430\u0432\u0442\u043E\u043C\u043E\u0439\u043A\u0430"
   type: 1
+  requiredSkill: {fileID: 11400000, guid: 783fc1f6303dcb84492992628d328b32, type: 2}
   jobIncomePerHour: 0
   jobHours: 0
   jobBonusMin: 0
@@ -23,7 +24,8 @@ MonoBehaviour:
   businessIncome: 130000
   businessStartTime: 3
   businessTimeCost: 90
-  investmentRisk: 0
-  realEstateCost: 0
-  realEstateIncome: 0
-  realEstateTimeCost: 0
+  investCost: 0
+  investRisk: 0
+  realtyCost: 0
+  realtyIncome: 0
+  realtyTimeCost: 0

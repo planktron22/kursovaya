@@ -25,6 +25,12 @@ public class OpportunityEditor : Editor
 
                 data.jobBonusMin = EditorGUILayout.IntField("Мин бонус", data.jobBonusMin);
                 data.jobBonusMax = EditorGUILayout.IntField("Макс бонус", data.jobBonusMax);
+                data.requiredSkill = (SkillData)EditorGUILayout.ObjectField(
+                     "Требуемый навык",
+                     data.requiredSkill,
+                     typeof(SkillData),
+                     false
+            );
                 break;
 
             case OpportunityType.Business:
@@ -32,6 +38,12 @@ public class OpportunityEditor : Editor
                 data.businessIncome = EditorGUILayout.IntField("Доход", data.businessIncome);
                 data.businessStartTime = EditorGUILayout.IntField("Время старта (периоды)", data.businessStartTime);
                 data.businessTimeCost = EditorGUILayout.IntField("Затраты времени", data.businessTimeCost);
+                data.requiredSkill = (SkillData)EditorGUILayout.ObjectField(
+                     "Требуемый навык",
+                     data.requiredSkill,
+                     typeof(SkillData),
+                     false
+            );
                 break;
 
             case OpportunityType.Invest:

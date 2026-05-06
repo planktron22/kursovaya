@@ -24,6 +24,10 @@ public class PlayerStats : MonoBehaviour
 
     private OpportunityDatabase opportunityDatabase;
 
+    public List<SkillData> learnedSkills = new List<SkillData>();
+    public List<PlayerSkillStudy> studyingSkills = new List<PlayerSkillStudy>();
+
+    public List<PlayerBankDeal> activeBankDeals = new List<PlayerBankDeal>();
 
     private PlayerStatsInfo statsUI;
     private JobListUI jobListUI;
@@ -116,6 +120,10 @@ public class PlayerStats : MonoBehaviour
 
         UpdateInvestPrices();
 
+        UpdateStudyingSkills();
+
+        UpdateBankDeals();
+
         Balance += NetIncome;
         foreach (var job in activeJobs)
         {
@@ -170,6 +178,12 @@ public class PlayerStats : MonoBehaviour
         if (FreeTime < job.jobHours)
         {
             Debug.Log($"Недостаточно свободного времени! Нужно: {job.jobHours}, доступно: {FreeTime}");
+            return;
+        }
+
+        if (job.requiredSkill != null && !HasSkill(job.requiredSkill))
+        {
+            Debug.Log("Не хватает навыка: " + job.requiredSkill.title);
             return;
         }
 
@@ -238,6 +252,12 @@ public class PlayerStats : MonoBehaviour
         if (FreeTime < data.businessTimeCost)
         {
             Debug.Log($"❌ Недостаточно времени!");
+            return;
+        }
+
+        if (data.requiredSkill != null && !HasSkill(data.requiredSkill))
+        {
+            Debug.Log("Не хватает навыка: " + data.requiredSkill.title);
             return;
         }
 
@@ -493,6 +513,184 @@ public class PlayerStats : MonoBehaviour
                 invest.currentCost = 1;
 
             Debug.Log($"{invest.title}: новая цена {invest.currentCost}");
+        }
+    }
+    public bool HasSkill(SkillData skill)
+    {
+        return learnedSkills.Contains(skill);
+    }
+
+    public bool IsStudyingSkill(SkillData skill)
+    {
+        foreach (var study in studyingSkills)
+        {
+            if (study.skill == skill)
+                return true;
+        }
+
+        return false;
+    }
+
+    public void StartStudyingSkill(SkillData skill)
+    {
+        if (HasSkill(skill))
+        {
+            Debug.Log("Этот навык уже изучен");
+            return;
+        }
+
+        if (IsStudyingSkill(skill))
+        {
+            Debug.Log("Этот навык уже изучается");
+            return;
+        }
+
+        if (Balance < skill.studyCost)
+        {
+            Debug.Log($"Недостаточно денег. Нужно: {skill.studyCost}, есть: {Balance}");
+            return;
+        }
+
+        if (FreeTime < skill.studyTimeCost)
+        {
+            Debug.Log($"Недостаточно свободного времени. Нужно: {skill.studyTimeCost}, есть: {FreeTime}");
+            return;
+        }
+
+        Balance -= skill.studyCost;
+        FreeTime -= skill.studyTimeCost;
+
+        studyingSkills.Add(new PlayerSkillStudy
+        {
+            skill = skill,
+            remainingPeriods = skill.studyPeriods,
+            timeCost = skill.studyTimeCost
+        });
+
+        Debug.Log("Начато обучение: " + skill.title);
+
+        UpdateUI();
+    }
+
+    void UpdateStudyingSkills()
+    {
+        for (int i = studyingSkills.Count - 1; i >= 0; i--)
+        {
+            studyingSkills[i].remainingPeriods--;
+
+            if (studyingSkills[i].remainingPeriods <= 0)
+            {
+                learnedSkills.Add(studyingSkills[i].skill);
+                FreeTime += studyingSkills[i].timeCost;
+
+                Debug.Log("Изучен навык: " + studyingSkills[i].skill.title);
+
+                studyingSkills.RemoveAt(i);
+            }
+        }
+    }
+
+    public void OpenDeposit(int amount, int years)
+    {
+        if (amount <= 0)
+        {
+            Debug.Log("Введите корректную сумму вклада");
+            return;
+        }
+
+        if (years < 1 || years > 5)
+        {
+            Debug.Log("Срок вклада должен быть от 1 до 5 лет");
+            return;
+        }
+
+        if (Balance < amount)
+        {
+            Debug.Log($"Недостаточно денег для вклада. Нужно: {amount}, есть: {Balance}");
+            return;
+        }
+
+        int finalAmount = BankCalculator.CalculateDepositFinalAmount(amount, years);
+
+        Balance -= amount;
+
+        activeBankDeals.Add(new PlayerBankDeal
+        {
+            isDeposit = true,
+            amount = amount,
+            years = years,
+            remainingPeriods = years * 6,
+            finalAmount = finalAmount
+        });
+
+        Debug.Log($"Открыт вклад на {years} лет. К получению: {finalAmount}");
+
+        UpdateUI();
+    }
+
+    public void OpenCredit(int amount, int years)
+    {
+        if (amount <= 0)
+        {
+            Debug.Log("Введите корректную сумму кредита");
+            return;
+        }
+
+        if (years < 1 || years > 5)
+        {
+            Debug.Log("Срок кредита должен быть от 1 до 5 лет");
+            return;
+        }
+
+        int periods = years * 6;
+        int hypotheticalIncome = NetIncome * periods;
+
+        int finalPayment = BankCalculator.CalculateCreditFinalPayment(amount, years);
+
+        if (finalPayment > hypotheticalIncome)
+        {
+            Debug.Log($"Банк отказал в кредите. Итоговый платеж: {finalPayment}, гипотетический доход: {hypotheticalIncome}");
+            return;
+        }
+
+
+        Balance += amount;
+
+        activeBankDeals.Add(new PlayerBankDeal
+        {
+            isDeposit = false,
+            amount = amount,
+            years = years,
+            remainingPeriods = periods,
+            finalAmount = finalPayment
+        });
+
+        Debug.Log($"Открыт кредит на {years} лет. К выплате: {finalPayment}");
+
+        UpdateUI();
+    }
+
+    void UpdateBankDeals()
+    {
+        for (int i = activeBankDeals.Count - 1; i >= 0; i--)
+        {
+            activeBankDeals[i].remainingPeriods--;
+
+            if (activeBankDeals[i].remainingPeriods <= 0)
+            {
+                if (activeBankDeals[i].isDeposit)
+                {
+                    Balance += activeBankDeals[i].finalAmount;
+                    Debug.Log($"Вклад завершён. Получено: {activeBankDeals[i].finalAmount}");
+                }
+                else
+                {
+                    Balance -= activeBankDeals[i].finalAmount;
+                    Debug.Log($"Кредит завершён. Списано: {activeBankDeals[i].finalAmount}");
+                }
+
+                activeBankDeals.RemoveAt(i);
+            }
         }
     }
 }

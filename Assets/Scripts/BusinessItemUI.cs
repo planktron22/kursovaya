@@ -10,6 +10,7 @@ public class BusinessItemUI : MonoBehaviour
     public Text incomeText;
     public Text delayText;
     public Text timeText;
+    public Text requiredSkillsText;
 
     public Button buyButton;
     public Button sellButton;

@@ -3,6 +3,7 @@ using UnityEngine;
 public class StatsManager : MonoBehaviour
 {
     public GameObject MainStatsPanel;
+    public GameObject BalancePanel;
     public GameObject IncomePanel;
     public GameObject LossPanel;
     public GameObject FreeTimePanel;
@@ -24,6 +25,7 @@ public class StatsManager : MonoBehaviour
     void HideAll()
     {
         MainStatsPanel.SetActive(false);
+        BalancePanel.SetActive(false);
         IncomePanel.SetActive(false);
         LossPanel.SetActive(false);
         FreeTimePanel.SetActive(false);

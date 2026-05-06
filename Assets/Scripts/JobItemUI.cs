@@ -10,6 +10,7 @@ public class JobItemUI : MonoBehaviour
     public Text timeText;
     public Text bonusText;
     public Text totalIncomeText;
+    public Text requiredSkillText;
 
     public Button applyButton;   
     public Button fireButton;    
@@ -38,6 +39,11 @@ public class JobItemUI : MonoBehaviour
         timeText.text = "Часы: " + Format(data.jobHours) + " ч";
         bonusText.text = $"Бонус: {Format(data.jobBonusMin)}-{Format(data.jobBonusMax)}";
         totalIncomeText.text = "Доход в период: " + Format(totalIncome) + " р";
+
+        if (data.requiredSkill != null)
+        {
+            requiredSkillText.text = "Требуется: " + data.requiredSkill.title;
+        }
 
         UpdateButtons();
     }

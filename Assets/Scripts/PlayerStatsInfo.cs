@@ -15,8 +15,9 @@ public class PlayerStatsInfo : MonoBehaviour
 
     public Transform jobsIncomeContainer;
     public Transform jobsTimeContainer;
+    public Transform balanceContainer;
 
-    public GameObject jobTextPrefab;
+    public GameObject InfoItemPrefab;
 
     private CultureInfo culture = new CultureInfo("ru-RU");
 
@@ -35,6 +36,7 @@ public class PlayerStatsInfo : MonoBehaviour
 
         UpdateIncomeList(stats);
         UpdateTimeList(stats);
+        UpdateBankDeals(stats);
     }
 
     void UpdateIncomeList(PlayerStats stats)
@@ -44,8 +46,8 @@ public class PlayerStatsInfo : MonoBehaviour
 
         foreach (var job in stats.activeJobs)
         {
-            GameObject obj = Instantiate(jobTextPrefab, jobsIncomeContainer);
-            Text text = obj.GetComponent<Text>();
+            GameObject obj = Instantiate(InfoItemPrefab, jobsIncomeContainer);
+            Text text = obj.GetComponentInChildren<Text>();
 
             if (job.isBusiness)
             {
@@ -75,10 +77,31 @@ public class PlayerStatsInfo : MonoBehaviour
 
         foreach (var job in stats.activeJobs)
         {
-            GameObject obj = Instantiate(jobTextPrefab, jobsTimeContainer);
-            Text text = obj.GetComponent<Text>();
+            GameObject obj = Instantiate(InfoItemPrefab, jobsTimeContainer);
+            Text text = obj.GetComponentInChildren<Text>();
 
             text.text = job.title + " - " + job.timeCost + " ч.";
+        }
+    }
+
+    void UpdateBankDeals(PlayerStats stats)
+    {
+        foreach (Transform child in balanceContainer)
+            Destroy(child.gameObject);
+
+        foreach (var deal in stats.activeBankDeals)
+        {
+            GameObject obj = Instantiate(InfoItemPrefab, balanceContainer);
+            Text text = obj.GetComponentInChildren<Text>();
+
+            string type = deal.isDeposit ? "Вклад" : "Кредит";
+            string result = deal.isDeposit ? "К получению" : "К уплате";
+
+            text.text =
+                $"{type}: {Format(deal.amount)} р.\n" +
+                $"Общий срок: {deal.years} лет ({deal.years * 6} периодов)\n" +
+                $"Осталось: {deal.remainingPeriods} периодов\n" +
+                $"{result}: {Format(deal.finalAmount)} р.";
         }
     }
 

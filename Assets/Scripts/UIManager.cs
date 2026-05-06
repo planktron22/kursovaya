@@ -20,6 +20,8 @@ public class UIManager : MonoBehaviour
     public UnityEngine.UI.Button opportunityButton;
 
     public bool isPanelOpen = false;
+
+    public GameObject bankPanel;
     public void ShowPanel(TileType type)
     {
         HideAll();
@@ -165,6 +167,34 @@ public class UIManager : MonoBehaviour
         else
         {
             investPanel.SetActive(true);
+            isPanelOpen = true;
+        }
+    }
+
+    public void ToggleBank()
+    {
+        if (playerMovement == null) return;
+
+        if (playerMovement.isMoving)
+        {
+            Debug.Log("Ќельз€ открыть банк во врем€ движени€");
+            return;
+        }
+
+        if (playerMovement.GetCurrentTileType() != TileType.Empty)
+        {
+            Debug.Log("Ѕанк доступен только на пустой клетке");
+            return;
+        }
+
+        if (bankPanel.activeSelf)
+        {
+            bankPanel.SetActive(false);
+            isPanelOpen = false;
+        }
+        else
+        {
+            bankPanel.SetActive(true);
             isPanelOpen = true;
         }
     }
