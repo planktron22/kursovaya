@@ -11,4 +11,5 @@ public class SkillData : ScriptableObject
     public int studyCost;
     public int studyTimeCost;
     public int studyPeriods;
+    public string id;
 }

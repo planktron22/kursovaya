@@ -5,4 +5,5 @@ public class PersonData : ScriptableObject
 {
     public string personName;
     public string description;
+    public string id;
 }

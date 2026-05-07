@@ -16,6 +16,8 @@ MonoBehaviour:
   description: "\u0448\u0430\u0443\u0440\u043C\u0430"
   type: 1
   requiredSkill: {fileID: 11400000, guid: 783fc1f6303dcb84492992628d328b32, type: 2}
+  requiredPerson: {fileID: 0}
+  id: biz_shaurma
   jobIncomePerHour: 0
   jobHours: 0
   jobBonusMin: 0

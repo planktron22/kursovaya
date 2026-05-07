@@ -18,6 +18,7 @@ public class PlayerStatsInfo : MonoBehaviour
     public Transform balanceContainer;
 
     public GameObject InfoItemPrefab;
+    public Transform lossContainer;
 
     private CultureInfo culture = new CultureInfo("ru-RU");
 
@@ -36,6 +37,7 @@ public class PlayerStatsInfo : MonoBehaviour
         UpdateIncomeList(stats);
         UpdateTimeList(stats);
         UpdateBankDeals(stats);
+        UpdateLossList(stats);
     }
 
     void UpdateIncomeList(PlayerStats stats)
@@ -104,6 +106,22 @@ public class PlayerStatsInfo : MonoBehaviour
         }
     }
 
+    void UpdateLossList(PlayerStats stats)
+    {
+        foreach (Transform child in lossContainer)
+            Destroy(child.gameObject);
+
+        CreateInfoItem(lossContainer, "Налоги - " + Format(stats.TaxLoss) + " р.");
+        CreateInfoItem(lossContainer, "Аренда жилья - " + Format(stats.rentLoss) + " р.");
+        CreateInfoItem(lossContainer, "Потребительская корзина - " + Format(stats.foodLoss) + " р.");
+    }
+
+    void CreateInfoItem(Transform parent, string textValue)
+    {
+        GameObject obj = Instantiate(InfoItemPrefab, parent);
+        Text text = obj.GetComponentInChildren<Text>();
+        text.text = textValue;
+    }
     string Format(int value)
     {
         return value.ToString("N0", culture);

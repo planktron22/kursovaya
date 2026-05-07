@@ -18,6 +18,7 @@ MonoBehaviour:
   type: 3
   requiredSkill: {fileID: 0}
   requiredPerson: {fileID: 11400000, guid: 08893a537c1fc854d910b5a5f65b1c6a, type: 2}
+  id: realty_centre_building
   jobIncomePerHour: 0
   jobHours: 0
   jobBonusMin: 0

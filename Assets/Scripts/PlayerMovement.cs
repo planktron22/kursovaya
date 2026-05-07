@@ -5,7 +5,7 @@ public class PlayerMovement : MonoBehaviour
 {
     public Transform[] tiles;
     public float moveSpeed = 5f;
-    private int currentTile = 0;
+    public int currentTile = 0;
     public bool isMoving = false;
     public float stepDelay = 0.1f;
 
@@ -86,6 +86,16 @@ public class PlayerMovement : MonoBehaviour
             return tile.tileType;
 
         return TileType.Empty;
+    }
+
+    public void SetCurrentTile(int tileIndex)
+    {
+        currentTile = tileIndex;
+
+        if (tiles != null && tiles.Length > 0)
+        {
+            transform.position = tiles[currentTile].position;
+        }
     }
 
     [Header("Debug Move")]

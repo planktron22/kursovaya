@@ -15,6 +15,9 @@ MonoBehaviour:
   title: "\u0413\u0430\u0437\u043F\u0440\u043E\u043C"
   description: ----
   type: 2
+  requiredSkill: {fileID: 0}
+  requiredPerson: {fileID: 0}
+  id: invest_gazprom
   jobIncomePerHour: 0
   jobHours: 0
   jobBonusMin: 0

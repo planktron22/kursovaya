@@ -21,6 +21,7 @@ public class Tile : MonoBehaviour
         Debug.Log("Игрок попал на: " + tileType);
 
         UIManager ui = FindObjectOfType<UIManager>();
+        RandomEventManager eventManager = FindObjectOfType<RandomEventManager>();
 
         switch (tileType)
         {
@@ -48,19 +49,17 @@ public class Tile : MonoBehaviour
                 break;
 
             case TileType.Luck:
-                ui.ShowPanel(tileType);
-                break;
-
             case TileType.Unluck:
-                ui.ShowPanel(tileType);
-                break;
-
             case TileType.UltraLuck:
-                ui.ShowPanel(tileType);
-                break;
-
             case TileType.UltraUnluck:
+
+                if (eventManager != null)
+                {
+                    eventManager.TriggerEvent(tileType);
+                }
+
                 ui.ShowPanel(tileType);
+
                 break;
         }
     }

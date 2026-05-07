@@ -12,6 +12,7 @@ public enum OpportunityType
 [CreateAssetMenu(fileName = "New Opportunity", menuName = "Game/Opportunity")]
 
 
+
 public class OpportunityData : ScriptableObject
 {
     public string title;
@@ -19,6 +20,7 @@ public class OpportunityData : ScriptableObject
     public OpportunityType type;
     public SkillData requiredSkill;
     public PersonData requiredPerson;
+    public string id;
 
     // --- Работа ---
     public int jobIncomePerHour;   // доход за час

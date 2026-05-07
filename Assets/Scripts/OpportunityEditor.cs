@@ -94,6 +94,8 @@ public class OpportunityEditor : Editor
                 break;
         }
 
+        data.id = EditorGUILayout.TextField("ID", data.id);
+
         if (GUI.changed)
         {
             EditorUtility.SetDirty(data);

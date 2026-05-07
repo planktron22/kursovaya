@@ -77,6 +77,11 @@ public class MainMenuManager : MonoBehaviour
         SceneManager.LoadScene("SampleScene");
     }
 
+    public void LoadGame()
+    {
+        SaveLoadManager.LoadGameFromMenu();
+    }
+
     // --- Выход ---
 
     public void QuitGame()

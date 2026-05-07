@@ -44,9 +44,16 @@ public class PlayerStats : MonoBehaviour
         jobListUI = FindObjectOfType<JobListUI>();
         opportunityDatabase = FindObjectOfType<OpportunityDatabase>();
 
-        ApplyDifficulty();
-
-        InitializeInvests(); 
+        if (SaveLoadManager.loadGameOnStart)
+        {
+            SaveLoadManager.loadGameOnStart = false;
+            LoadFromSave();
+        }
+        else
+        {
+            ApplyDifficulty();
+            InitializeInvests();
+        }
 
         RecalculateIncome();
         UpdateUI();
@@ -66,7 +73,7 @@ public class PlayerStats : MonoBehaviour
                 break;
 
             case 1:
-                Balance = 500000;   // тестовая
+                Balance = 10000000;   // тестовая
                 Loss = 45000;
                 FreeTime = 500;
                 Age = 30;
@@ -98,24 +105,34 @@ public class PlayerStats : MonoBehaviour
         {
             if (job.isBusiness)
             {
-                // если бизнес еще не запустился
                 if (job.currentDelay < job.startDelay)
                     continue;
 
-                TotalIncome += job.jobData.businessIncome;
+                TotalIncome += ApplyPercentBonus(
+                    job.jobData.businessIncome,
+                    businessIncomePercentBonus
+                );
+            }
+            else if (job.isRealty)
+            {
+                TotalIncome += ApplyPercentBonus(
+                    job.jobData.realtyIncome,
+                    realtyIncomePercentBonus
+                );
             }
             else
             {
                 TotalIncome += CalculateJobIncome(job.jobData);
             }
-
-            if (job.isRealty)
-            {
-                TotalIncome += job.jobData.realtyIncome;
-            }
         }
 
-        TotalLoss = Loss;
+        TotalLoss = rentLoss + foodLoss + TaxLoss;
+    }
+
+    public void RecalculateIncomePublic()
+    {
+        RecalculateIncome();
+        UpdateUI();
     }
 
     // --- ПЕРИОД ---
@@ -134,6 +151,8 @@ public class PlayerStats : MonoBehaviour
         UpdateDepression();
 
         CheckDebtState();
+
+        UpdateTemporaryEffects();
 
 
         foreach (var job in activeJobs)
@@ -174,7 +193,7 @@ public class PlayerStats : MonoBehaviour
             bonusIncome += randomStep;
         }
 
-        return baseIncome + bonusIncome;
+        return ApplyPercentBonus(baseIncome + bonusIncome, jobIncomePercentBonus);
     }
 
     // --- НАЙМ ---
@@ -1043,5 +1062,266 @@ public class PlayerStats : MonoBehaviour
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #endif
+    }
+
+    public List<TemporaryEffect> temporaryEffects = new List<TemporaryEffect>();
+
+    public int jobIncomePercentBonus = 0;
+    public int businessIncomePercentBonus = 0;
+    public int realtyIncomePercentBonus = 0;
+
+    void UpdateTemporaryEffects()
+    {
+        for (int i = temporaryEffects.Count - 1; i >= 0; i--)
+        {
+            temporaryEffects[i].remainingPeriods--;
+
+            if (temporaryEffects[i].remainingPeriods <= 0)
+            {
+                FreeTime += temporaryEffects[i].timePenalty;
+
+                Debug.Log("Завершился временный эффект: " + temporaryEffects[i].title);
+
+                temporaryEffects.RemoveAt(i);
+            }
+        }
+    }
+
+    public int ApplyPercentBonus(int value, int percent)
+    {
+        return Mathf.RoundToInt(value * (1f + percent / 100f));
+    }
+
+    public void AddRealtyForFree(OpportunityData data)
+    {
+        if (data == null)
+        {
+            Debug.Log("Недвижимость не назначена в событии");
+            return;
+        }
+
+        foreach (var active in activeJobs)
+        {
+            if (active.jobData == data)
+            {
+                Debug.Log("Эта недвижимость уже есть");
+                return;
+            }
+        }
+
+        activeJobs.Add(new PlayerActive
+        {
+            title = data.title,
+            timeCost = data.realtyTimeCost,
+            jobData = data,
+            isRealty = true
+        });
+
+        FreeTime -= data.realtyTimeCost;
+
+        RecalculateIncome();
+        UpdateUI();
+
+        Debug.Log("Получена недвижимость бесплатно: " + data.title);
+    }
+
+    public void BurnLargeDeposits(int limit)
+    {
+        for (int i = activeBankDeals.Count - 1; i >= 0; i--)
+        {
+            if (activeBankDeals[i].isDeposit && activeBankDeals[i].amount > limit)
+            {
+                Debug.Log("Сгорел вклад: " + activeBankDeals[i].amount);
+                activeBankDeals.RemoveAt(i);
+            }
+        }
+
+        UpdateUI();
+    }
+
+    public void BurnRandomBusinessOrRealty()
+    {
+        List<PlayerActive> assets = new List<PlayerActive>();
+
+        foreach (var asset in activeJobs)
+        {
+            if (asset.isBusiness || asset.isRealty)
+            {
+                assets.Add(asset);
+            }
+        }
+
+        if (assets.Count == 0)
+        {
+            Debug.Log("Нет бизнеса или недвижимости для уничтожения");
+            return;
+        }
+
+        PlayerActive burned = assets[Random.Range(0, assets.Count)];
+
+        activeJobs.Remove(burned);
+        FreeTime += burned.timeCost;
+
+        Debug.Log("Сгорел актив: " + burned.title);
+
+        RecalculateIncome();
+        UpdateUI();
+    }
+
+    [Header("Expenses")]
+    public int rentLoss = 45000;
+    public int foodLoss = 30000;
+    public int taxPercent = 15;
+
+    public int TaxLoss => Mathf.RoundToInt(TotalIncome * (taxPercent / 100f));
+
+    public void LoadFromSave()
+    {
+        SaveData data = SaveLoadManager.LoadSaveFile();
+
+        if (data == null)
+        {
+            ApplyDifficulty();
+            InitializeInvests();
+            return;
+        }
+
+        Balance = data.balance;
+        Mood = data.mood;
+        FreeTime = data.freeTime;
+        Age = data.age;
+
+        jobIncomePercentBonus = data.jobIncomePercentBonus;
+        businessIncomePercentBonus = data.businessIncomePercentBonus;
+        realtyIncomePercentBonus = data.realtyIncomePercentBonus;
+
+        activeJobs.Clear();
+        activeInvests.Clear();
+        learnedSkills.Clear();
+        studyingSkills.Clear();
+        knownPeople.Clear();
+        activeBankDeals.Clear();
+
+        PlayerMovement movement = GetComponent<PlayerMovement>();
+
+        if (movement != null)
+        {
+            movement.SetCurrentTile(data.currentTile);
+        }
+
+        foreach (var saved in data.activeAssets)
+        {
+            OpportunityData opportunity =
+                opportunityDatabase.FindOpportunityById(saved.opportunityId);
+
+            if (opportunity == null)
+                continue;
+
+            PlayerActive active = new PlayerActive
+            {
+                title = opportunity.title,
+                timeCost = GetTimeCost(opportunity),
+                jobData = opportunity,
+                workedPeriods = saved.workedPeriods,
+                currentDelay = saved.currentDelay
+            };
+
+            if (opportunity.type == OpportunityType.Business)
+            {
+                active.isBusiness = true;
+                active.startDelay = opportunity.businessStartTime;
+            }
+            else if (opportunity.type == OpportunityType.Realty)
+            {
+                active.isRealty = true;
+            }
+
+            activeJobs.Add(active);
+        }
+
+        foreach (var saved in data.invests)
+        {
+            OpportunityData opportunity =
+                opportunityDatabase.FindOpportunityById(saved.opportunityId);
+
+            if (opportunity == null)
+                continue;
+
+            activeInvests.Add(new PlayerInvest
+            {
+                title = opportunity.title,
+                investData = opportunity,
+                currentCost = saved.currentCost,
+                amount = saved.amount
+            });
+        }
+
+        foreach (string id in data.learnedSkillIds)
+        {
+            SkillData skill = opportunityDatabase.FindSkillById(id);
+
+            if (skill != null)
+                learnedSkills.Add(skill);
+        }
+
+        foreach (var saved in data.studyingSkills)
+        {
+            SkillData skill = opportunityDatabase.FindSkillById(saved.skillId);
+
+            if (skill != null)
+            {
+                studyingSkills.Add(new PlayerSkillStudy
+                {
+                    skill = skill,
+                    remainingPeriods = saved.remainingPeriods,
+                    timeCost = saved.timeCost
+                });
+            }
+        }
+
+        foreach (string id in data.knownPersonIds)
+        {
+            PersonData person = opportunityDatabase.FindPersonById(id);
+
+            if (person != null)
+                knownPeople.Add(person);
+        }
+
+        foreach (var saved in data.bankDeals)
+        {
+            activeBankDeals.Add(new PlayerBankDeal
+            {
+                isDeposit = saved.isDeposit,
+                amount = saved.amount,
+                years = saved.years,
+                remainingPeriods = saved.remainingPeriods,
+                finalAmount = saved.finalAmount
+            });
+        }
+
+        Debug.Log("Сохранение загружено");
+    }
+
+    int GetTimeCost(OpportunityData data)
+    {
+        switch (data.type)
+        {
+            case OpportunityType.Job:
+                return data.jobHours;
+
+            case OpportunityType.Business:
+                return data.businessTimeCost;
+
+            case OpportunityType.Realty:
+                return data.realtyTimeCost;
+
+            default:
+                return 0;
+        }
+    }
+
+    public void SaveCurrentGame()
+    {
+        SaveLoadManager.SaveGame(this);
     }
 }

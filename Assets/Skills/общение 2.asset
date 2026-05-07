@@ -18,3 +18,4 @@ MonoBehaviour:
   studyCost: 80000
   studyTimeCost: 40
   studyPeriods: 6
+  id: skill_communication2

@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   personName: "\u0420\u0438\u044D\u043B\u0442\u043E\u0440"
   description: ----
+  id: person_realestator
