@@ -31,6 +31,7 @@ public class UIManager : MonoBehaviour
         switch (type)
         {
             case TileType.Community:
+
                 communityPanel.SetActive(true);
                 break;
 
@@ -80,22 +81,17 @@ public class UIManager : MonoBehaviour
             return;
         }
 
-        if (playerMovement.GetCurrentTileType() != TileType.Empty)
+        PlayerStats stats = FindObjectOfType<PlayerStats>();
+        bool debtMode = stats != null && stats.debtMode;
+
+        if (!debtMode && playerMovement.GetCurrentTileType() != TileType.Empty)
         {
             Debug.Log("ћожно открыть только на пустой клетке");
             return;
         }
 
-        if (opportunityPanel.activeSelf)
-        {
-            opportunityPanel.SetActive(false);
-            isPanelOpen = false;
-        }
-        else
-        {
-            opportunityPanel.SetActive(true);
-            isPanelOpen = true;
-        }
+        opportunityPanel.SetActive(!opportunityPanel.activeSelf);
+        isPanelOpen = opportunityPanel.activeSelf;
     }
 
     public void HideAll()
@@ -181,22 +177,17 @@ public class UIManager : MonoBehaviour
             return;
         }
 
-        if (playerMovement.GetCurrentTileType() != TileType.Empty)
+        PlayerStats stats = FindObjectOfType<PlayerStats>();
+        bool debtMode = stats != null && stats.debtMode;
+
+        if (!debtMode && playerMovement.GetCurrentTileType() != TileType.Empty)
         {
             Debug.Log("Ѕанк доступен только на пустой клетке");
             return;
         }
 
-        if (bankPanel.activeSelf)
-        {
-            bankPanel.SetActive(false);
-            isPanelOpen = false;
-        }
-        else
-        {
-            bankPanel.SetActive(true);
-            isPanelOpen = true;
-        }
+        bankPanel.SetActive(!bankPanel.activeSelf);
+        isPanelOpen = bankPanel.activeSelf;
     }
 
     void Update()

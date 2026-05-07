@@ -25,12 +25,18 @@ public class OpportunityEditor : Editor
 
                 data.jobBonusMin = EditorGUILayout.IntField("Мин бонус", data.jobBonusMin);
                 data.jobBonusMax = EditorGUILayout.IntField("Макс бонус", data.jobBonusMax);
-                data.requiredSkill = (SkillData)EditorGUILayout.ObjectField(
+                                data.requiredSkill = (SkillData)EditorGUILayout.ObjectField(
                      "Требуемый навык",
                      data.requiredSkill,
                      typeof(SkillData),
                      false
-            );
+                        );
+                data.requiredPerson = (PersonData)EditorGUILayout.ObjectField(
+                     "Требуемое знакомство",
+                      data.requiredPerson,
+                      typeof(PersonData),
+                      false
+                         );
                 break;
 
             case OpportunityType.Business:
@@ -43,18 +49,48 @@ public class OpportunityEditor : Editor
                      data.requiredSkill,
                      typeof(SkillData),
                      false
-            );
+                        );
+                data.requiredPerson = (PersonData)EditorGUILayout.ObjectField(
+                     "Требуемое знакомство",
+                      data.requiredPerson,
+                      typeof(PersonData),
+                      false
+                         );
                 break;
 
             case OpportunityType.Invest:
                 data.investCost = EditorGUILayout.IntField("Цена за акцию", data.investCost);
                 data.investRisk = EditorGUILayout.IntSlider("Риск", data.investRisk, 1, 5);
+                data.requiredSkill = (SkillData)EditorGUILayout.ObjectField(
+                     "Требуемый навык",
+                     data.requiredSkill,
+                     typeof(SkillData),
+                     false
+                        );
+                data.requiredPerson = (PersonData)EditorGUILayout.ObjectField(
+                     "Требуемое знакомство",
+                      data.requiredPerson,
+                      typeof(PersonData),
+                      false
+                         );
                 break;
 
             case OpportunityType.Realty:
                 data.realtyCost = EditorGUILayout.IntField("Стоимость", data.realtyCost);
                 data.realtyIncome = EditorGUILayout.IntField("Доход", data.realtyIncome);
                 data.realtyTimeCost = EditorGUILayout.IntField("Затраты времени", data.realtyTimeCost);
+                data.requiredSkill = (SkillData)EditorGUILayout.ObjectField(
+                     "Требуемый навык",
+                     data.requiredSkill,
+                     typeof(SkillData),
+                     false
+                        );
+                data.requiredPerson = (PersonData)EditorGUILayout.ObjectField(
+                     "Требуемое знакомство",
+                      data.requiredPerson,
+                      typeof(PersonData),
+                      false
+                         );
                 break;
         }
 

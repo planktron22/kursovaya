@@ -31,7 +31,16 @@ public class Tile : MonoBehaviour
                 break;
 
             case TileType.Community:
+
+                PlayerStats player = FindObjectOfType<PlayerStats>();
+
+                if (player != null)
+                {
+                    player.TryMeetRandomPerson();
+                }
+
                 ui.ShowPanel(tileType);
+
                 break;
 
             case TileType.Studying:

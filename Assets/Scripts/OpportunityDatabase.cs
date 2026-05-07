@@ -8,4 +8,5 @@ public class OpportunityDatabase : MonoBehaviour
     public OpportunityData[] invests;
 
     public SkillData[] skills;
+    public PersonData[] people;
 }

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class PlayerStats : MonoBehaviour
 {
@@ -7,7 +8,6 @@ public class PlayerStats : MonoBehaviour
     public int Balance;
     public int Loss;
     public int FreeTime;
-    public int Health;
     public int Mood;
     public int Age;
 
@@ -26,6 +26,12 @@ public class PlayerStats : MonoBehaviour
 
     public List<SkillData> learnedSkills = new List<SkillData>();
     public List<PlayerSkillStudy> studyingSkills = new List<PlayerSkillStudy>();
+    public List<PersonData> knownPeople = new List<PersonData>();
+
+    [Header("Communication Skills")]
+    public SkillData communicationLevel1;
+    public SkillData communicationLevel2;
+    public SkillData communicationLevel3;
 
     public List<PlayerBankDeal> activeBankDeals = new List<PlayerBankDeal>();
 
@@ -60,7 +66,7 @@ public class PlayerStats : MonoBehaviour
                 break;
 
             case 1:
-                Balance = 10000000;   // тестовая
+                Balance = 500000;   // тестовая
                 Loss = 45000;
                 FreeTime = 500;
                 Age = 30;
@@ -74,7 +80,6 @@ public class PlayerStats : MonoBehaviour
                 break;
         }
 
-        Health = 100;
         Mood = 100;
     }
 
@@ -115,7 +120,8 @@ public class PlayerStats : MonoBehaviour
 
     // --- ПЕРИОД ---
     public void ApplyPeriod()
-    {
+    {     
+        Balance += NetIncome;
         RecalculateIncome();
 
         UpdateInvestPrices();
@@ -124,7 +130,12 @@ public class PlayerStats : MonoBehaviour
 
         UpdateBankDeals();
 
-        Balance += NetIncome;
+        ApplyMoodChanges();
+        UpdateDepression();
+
+        CheckDebtState();
+
+
         foreach (var job in activeJobs)
         {
             job.workedPeriods++;
@@ -186,6 +197,13 @@ public class PlayerStats : MonoBehaviour
             Debug.Log("Не хватает навыка: " + job.requiredSkill.title);
             return;
         }
+
+        if (job.requiredPerson != null && !KnowsPerson(job.requiredPerson))
+        {
+            Debug.Log("Нужно знакомство: " + job.requiredPerson.personName);
+            return;
+        }
+
 
         activeJobs.Add(new PlayerActive
         {
@@ -255,6 +273,12 @@ public class PlayerStats : MonoBehaviour
             return;
         }
 
+        if (data.requiredPerson != null && !KnowsPerson(data.requiredPerson))
+        {
+            Debug.Log("Нужно знакомство: " + data.requiredPerson.personName);
+            return;
+        }
+
         if (data.requiredSkill != null && !HasSkill(data.requiredSkill))
         {
             Debug.Log("Не хватает навыка: " + data.requiredSkill.title);
@@ -306,6 +330,7 @@ public class PlayerStats : MonoBehaviour
         activeJobs.Remove(business);
 
         RecalculateIncome();
+        CheckDebtState();
         UpdateUI();
 
         Debug.Log("Бизнес продан: " + business.title);
@@ -322,6 +347,18 @@ public class PlayerStats : MonoBehaviour
         if (FreeTime < data.realtyTimeCost)
         {
             Debug.Log($"Недостаточно времени! Нужно: {data.realtyTimeCost}, есть: {FreeTime}");
+            return;
+        }
+
+        if (data.requiredPerson != null && !KnowsPerson(data.requiredPerson))
+        {
+            Debug.Log("Нужно знакомство: " + data.requiredPerson.personName);
+            return;
+        }
+
+        if (data.requiredSkill != null && !HasSkill(data.requiredSkill))
+        {
+            Debug.Log("Не хватает навыка: " + data.requiredSkill.title);
             return;
         }
 
@@ -360,6 +397,7 @@ public class PlayerStats : MonoBehaviour
         activeJobs.Remove(realty);
 
         RecalculateIncome();
+        CheckDebtState();
         UpdateUI();
 
         Debug.Log("Недвижимость продана: " + realty.title);
@@ -453,6 +491,7 @@ public class PlayerStats : MonoBehaviour
         Balance += invest.currentCost * amount;
 
         Debug.Log($"Продано акций {invest.title}: {amount}");
+        CheckDebtState();
 
         UpdateUI();
     }
@@ -545,6 +584,12 @@ public class PlayerStats : MonoBehaviour
             return;
         }
 
+        if (skill.requiredSkill != null && !HasSkill(skill.requiredSkill))
+        {
+            Debug.Log("Сначала нужно изучить навык: " + skill.requiredSkill.title);
+            return;
+        }
+
         if (Balance < skill.studyCost)
         {
             Debug.Log($"Недостаточно денег. Нужно: {skill.studyCost}, есть: {Balance}");
@@ -625,6 +670,7 @@ public class PlayerStats : MonoBehaviour
 
         Debug.Log($"Открыт вклад на {years} лет. К получению: {finalAmount}");
 
+        CheckDebtState();
         UpdateUI();
     }
 
@@ -667,6 +713,7 @@ public class PlayerStats : MonoBehaviour
 
         Debug.Log($"Открыт кредит на {years} лет. К выплате: {finalPayment}");
 
+        CheckDebtState();
         UpdateUI();
     }
 
@@ -692,5 +739,309 @@ public class PlayerStats : MonoBehaviour
                 activeBankDeals.RemoveAt(i);
             }
         }
+    }
+
+    public bool KnowsPerson(PersonData person)
+    {
+        if (person == null)
+            return true;
+
+        return knownPeople.Contains(person);
+    }
+
+    public void TryMeetRandomPerson()
+    {
+        if (opportunityDatabase == null)
+        {
+            Debug.LogError("OpportunityDatabase не найден");
+            return;
+        }
+
+        if (opportunityDatabase.people == null || opportunityDatabase.people.Length == 0)
+        {
+            Debug.Log("В базе нет людей для знакомства");
+            return;
+        }
+
+        if (FreeTime < 5)
+        {
+            Debug.Log("Недостаточно свободного времени для знакомства. Нужно 5 ч.");
+            return;
+        }
+
+        FreeTime -= 5;
+
+        PersonData person = opportunityDatabase.people[
+            Random.Range(0, opportunityDatabase.people.Length)
+        ];
+
+        if (knownPeople.Contains(person))
+        {
+            Debug.Log("Вы уже знакомы с: " + person.personName);
+            UpdateUI();
+            return;
+        }
+
+        int level = GetCommunicationLevel();
+        int chance = GetCommunicationChance();
+
+        Debug.Log("Уровень общения: " + level);
+        Debug.Log("Шанс знакомства: " + chance + "%");
+
+        int roll = Random.Range(1, 101);
+
+        Debug.Log(
+            $"Попытка знакомства: {person.personName}. " +
+            $"Шанс: {chance}%, выпало: {roll}"
+        );
+
+        if (roll <= chance)
+        {
+            knownPeople.Add(person);
+
+            Debug.Log("Успешное знакомство: " + person.personName);
+        }
+        else
+        {
+            Debug.Log("Знакомство не удалось: " + person.personName);
+        }
+
+        UpdateUI();
+    }
+
+    int GetCommunicationLevel()
+    {
+        if (communicationLevel3 != null && learnedSkills.Contains(communicationLevel3))
+            return 3;
+
+        if (communicationLevel2 != null && learnedSkills.Contains(communicationLevel2))
+            return 2;
+
+        if (communicationLevel1 != null && learnedSkills.Contains(communicationLevel1))
+            return 1;
+
+        return 0;
+    }
+
+    int GetCommunicationChance()
+    {
+        int level = GetCommunicationLevel();
+
+        switch (level)
+        {
+            case 1: return 45;
+            case 2: return 65;
+            case 3: return 90;
+            default: return 20;
+        }
+    }
+
+    [Header("Mood System")]
+    public bool isDepressed = false;
+    public int moodZeroPeriods = 0;
+    public int depressionPeriodsLeft = 0;
+
+    public int depressionTreatmentCost = 500000;
+    public int depressionTimeCost = 100;
+    public int depressionDuration = 6;
+
+    void ApplyMoodChanges()
+    {
+        int moodChange = 0;
+
+        // --- свободное время ---
+        if (FreeTime < 10)
+        {
+            moodChange -= 10;
+        }
+        else if (FreeTime < 25)
+        {
+            moodChange -= 5;
+        }
+        else if (FreeTime > 150)
+        {
+            moodChange += 10;
+        }
+        else if (FreeTime > 100)
+        {
+            moodChange += 5;
+        }
+
+        // --- чистая прибыль ---
+        if (NetIncome < 0)
+        {
+            int lossPerPeriod = Mathf.Abs(NetIncome);
+
+            if (lossPerPeriod > 0 && Balance / lossPerPeriod <= 3)
+            {
+                moodChange -= 10;
+            }
+            else
+            {
+                moodChange -= 5;
+            }
+        }
+        else if (NetIncome > 0)
+        {
+            if (TotalLoss > 0 && TotalIncome >= TotalLoss * 2)
+            {
+                moodChange += 10;
+            }
+            else
+            {
+                moodChange += 5;
+            }
+        }
+
+        Mood += moodChange;
+        Mood = Mathf.Clamp(Mood, 0, 100);
+
+        Debug.Log("Изменение настроения за период: " + moodChange + ". Настроение: " + Mood);
+    }
+
+    void UpdateDepression()
+    {
+        if (Mood <= 0)
+        {
+            moodZeroPeriods++;
+        }
+        else
+        {
+            moodZeroPeriods = 0;
+        }
+
+        if (!isDepressed && moodZeroPeriods >= 2)
+        {
+            StartDepressionTreatment();
+        }
+
+        if (isDepressed)
+        {
+            depressionPeriodsLeft--;
+
+            if (depressionPeriodsLeft <= 0)
+            {
+                EndDepressionTreatment();
+            }
+        }
+    }
+
+    void StartDepressionTreatment()
+    {
+        isDepressed = true;
+        depressionPeriodsLeft = depressionDuration;
+
+        Balance -= depressionTreatmentCost;
+        FreeTime -= depressionTimeCost;
+
+        Debug.Log(
+            "Игрок впал в депрессию. Начат курс лечения: -" +
+            depressionTreatmentCost + " р., -" +
+            depressionTimeCost + " ч. на " +
+            depressionDuration + " периодов"
+        );
+    }
+
+    void EndDepressionTreatment()
+    {
+        isDepressed = false;
+        moodZeroPeriods = 0;
+
+        FreeTime += depressionTimeCost;
+        Mood = 50;
+
+        Debug.Log("Курс лечения завершён. Настроение восстановлено до 50");
+    }
+
+    [Header("Debt / Failure")]
+    public bool debtMode = false;
+
+    public void CheckDebtState()
+    {
+        if (Balance >= 0)
+        {
+            debtMode = false;
+            return;
+        }
+
+        debtMode = true;
+
+        Debug.Log("Баланс ниже нуля. Проверка активов...");
+
+        if (HasSellableAssets())
+        {
+            Debug.Log("Есть активы для продажи. Игрок может погасить долг вручную.");
+            return;
+        }
+
+        AutoCloseDepositsOrGameOver();
+    }
+
+    bool HasSellableAssets()
+    {
+        foreach (var asset in activeJobs)
+        {
+            if (asset.isBusiness || asset.isRealty)
+                return true;
+        }
+
+        foreach (var invest in activeInvests)
+        {
+            if (invest.amount > 0)
+                return true;
+        }
+
+        return false;
+    }
+
+    void AutoCloseDepositsOrGameOver()
+    {
+        bool hadDeposit = false;
+
+        for (int i = activeBankDeals.Count - 1; i >= 0; i--)
+        {
+            PlayerBankDeal deal = activeBankDeals[i];
+
+            if (deal.isDeposit)
+            {
+                hadDeposit = true;
+
+                Balance += deal.amount;
+                activeBankDeals.RemoveAt(i);
+
+                Debug.Log("Вклад закрыт досрочно. Возвращено без процентов: " + deal.amount);
+            }
+        }
+
+        UpdateUI();
+
+        if (Balance >= 0)
+        {
+            debtMode = false;
+            Debug.Log("Долг погашен за счет вкладов.");
+            return;
+        }
+
+        if (!hadDeposit)
+        {
+            Debug.Log("Нет активов и вкладов. Игра окончена.");
+        }
+        else
+        {
+            Debug.Log("Вкладов не хватило для погашения долга. Игра окончена.");
+        }
+
+        GameOver();
+    }
+
+    void GameOver()
+    {
+        Debug.Log("GAME OVER");
+
+        Application.Quit();
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
     }
 }

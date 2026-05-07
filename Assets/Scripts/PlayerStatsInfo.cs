@@ -30,7 +30,6 @@ public class PlayerStatsInfo : MonoBehaviour
         netIncomeText.text = Format(stats.NetIncome) + " р.";
 
         freeTimeText.text = Format(stats.FreeTime) + " ч.";
-        healthText.text = stats.Health + "/100";
         moodText.text = stats.Mood + "/100";
         ageText.text = stats.Age + " лет";
 

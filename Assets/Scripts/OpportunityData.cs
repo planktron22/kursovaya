@@ -18,6 +18,7 @@ public class OpportunityData : ScriptableObject
     public string description;
     public OpportunityType type;
     public SkillData requiredSkill;
+    public PersonData requiredPerson;
 
     // --- Работа ---
     public int jobIncomePerHour;   // доход за час

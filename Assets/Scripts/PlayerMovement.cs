@@ -87,4 +87,21 @@ public class PlayerMovement : MonoBehaviour
 
         return TileType.Empty;
     }
+
+    [Header("Debug Move")]
+    public int debugSteps = 1;
+    public bool debugMove = false;
+
+    void Update()
+    {
+        if (debugMove)
+        {
+            debugMove = false;
+
+            if (!isMoving)
+            {
+                Move(debugSteps);
+            }
+        }
+    }
 }

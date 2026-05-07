@@ -7,7 +7,6 @@ public class StatsManager : MonoBehaviour
     public GameObject IncomePanel;
     public GameObject LossPanel;
     public GameObject FreeTimePanel;
-    public GameObject HealthPanel;
     public GameObject MoodPanel;
 
     public void OpenPanel(GameObject panel)
@@ -29,7 +28,6 @@ public class StatsManager : MonoBehaviour
         IncomePanel.SetActive(false);
         LossPanel.SetActive(false);
         FreeTimePanel.SetActive(false);
-        HealthPanel.SetActive(false);
         MoodPanel.SetActive(false);
     }
 }
