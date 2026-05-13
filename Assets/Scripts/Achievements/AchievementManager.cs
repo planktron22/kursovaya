@@ -9,6 +9,27 @@ public class AchievementManager : MonoBehaviour
 {
     public static AchievementManager Instance { get; private set; }
 
+    private static readonly string[] AllAchievementIds =
+    {
+        "first_move",
+        "first_period",
+        "first_year",
+        "positive_income",
+        "safety_cushion",
+        "debt",
+        "low_mood",
+        "no_time",
+        "depression",
+        "first_job",
+        "first_business",
+        "first_realty",
+        "first_invest",
+        "first_skill",
+        "first_person",
+        "first_deposit",
+        "first_credit"
+    };
+
     [Header("Links")]
     public PlayerStats player;
     public PlayerMovement movement;
@@ -356,14 +377,21 @@ public class AchievementManager : MonoBehaviour
 
     public void ResetAchievements()
     {
+        ResetSavedAchievements();
+
         foreach (AchievementInfo achievement in achievements)
-        {
             achievement.unlocked = false;
-            PlayerPrefs.DeleteKey(GetPrefsKey(achievement.id));
-        }
+
+        RefreshPanel();
+    }
+
+    public static void ResetSavedAchievements()
+    {
+        foreach (string id in AllAchievementIds)
+            PlayerPrefs.DeleteKey(GetPrefsKeyStatic(id));
 
         PlayerPrefs.Save();
-        RefreshPanel();
+        Debug.Log("Достижения сброшены для новой игры");
     }
 
     void LoadUnlockedAchievements()
@@ -375,6 +403,11 @@ public class AchievementManager : MonoBehaviour
     }
 
     string GetPrefsKey(string id)
+    {
+        return GetPrefsKeyStatic(id);
+    }
+
+    static string GetPrefsKeyStatic(string id)
     {
         return "CourseworkAchievement_" + id;
     }
