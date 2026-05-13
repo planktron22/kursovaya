@@ -91,7 +91,7 @@ public class AchievementToastUI : MonoBehaviour
         rect.sizeDelta = size;
 
         Text text = obj.GetComponent<Text>();
-        text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         text.fontSize = fontSize;
         text.fontStyle = style;
         text.color = new Color(0.196f, 0.196f, 0.196f, 1f);

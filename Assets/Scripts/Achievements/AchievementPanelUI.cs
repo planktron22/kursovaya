@@ -20,6 +20,8 @@ public class AchievementPanelUI : MonoBehaviour
     private readonly Color panelColor = new Color(0.67f, 0.64f, 0.64f, 0.392f);
     private readonly Color darkTextColor = new Color(0.196f, 0.196f, 0.196f, 1f);
     private readonly Color blueButtonColor = new Color(0.121f, 0.542f, 0.736f, 1f);
+    private readonly Color unlockedGreenColor = new Color(0.50f, 0.82f, 0.50f, 0.78f);
+    private readonly Color lockedGrayColor = new Color(0.75f, 0.75f, 0.75f, 0.55f);
 
     void Start()
     {
@@ -112,7 +114,7 @@ public class AchievementPanelUI : MonoBehaviour
         viewportRect.anchorMin = Vector2.zero;
         viewportRect.anchorMax = Vector2.one;
         viewportRect.offsetMin = Vector2.zero;
-        viewportRect.offsetMax = Vector2.zero;
+        viewportRect.offsetMax = new Vector2(-22f, 0f);
         viewport.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.05f);
         viewport.GetComponent<Mask>().showMaskGraphic = false;
 
@@ -136,11 +138,17 @@ public class AchievementPanelUI : MonoBehaviour
         ContentSizeFitter fitter = content.GetComponent<ContentSizeFitter>();
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
+        Scrollbar verticalScrollbar = CreateVerticalScrollbar(scrollObject.transform);
+
         ScrollRect scrollRect = scrollObject.GetComponent<ScrollRect>();
         scrollRect.viewport = viewportRect;
         scrollRect.content = contentRect;
         scrollRect.horizontal = false;
         scrollRect.vertical = true;
+        scrollRect.verticalScrollbar = verticalScrollbar;
+        scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHideAndExpandViewport;
+        scrollRect.verticalScrollbarSpacing = 4f;
+        scrollRect.scrollSensitivity = 25f;
 
         contentParent = content.transform;
     }
@@ -154,16 +162,58 @@ public class AchievementPanelUI : MonoBehaviour
         layoutElement.preferredHeight = 72f;
 
         Image rowImage = row.GetComponent<Image>();
-        rowImage.color = achievement.unlocked
-            ? new Color(1f, 1f, 1f, 0.75f)
-            : new Color(0.75f, 0.75f, 0.75f, 0.55f);
+        rowImage.color = achievement.unlocked ? unlockedGreenColor : lockedGrayColor;
 
         string status = achievement.unlocked ? "Открыто" : "Закрыто";
         Text title = CreateText("Title", row.transform, new Vector2(14f, -8f), new Vector2(430f, 25f), 16, FontStyle.Bold);
         title.text = achievement.title + " — " + status;
+        title.color = achievement.unlocked ? new Color(0.05f, 0.30f, 0.05f, 1f) : darkTextColor;
 
         Text description = CreateText("Description", row.transform, new Vector2(14f, -35f), new Vector2(490f, 30f), 14, FontStyle.Normal);
         description.text = achievement.description;
+    }
+
+    Scrollbar CreateVerticalScrollbar(Transform parent)
+    {
+        GameObject scrollbarObject = new GameObject("Vertical Scrollbar", typeof(RectTransform), typeof(Image), typeof(Scrollbar));
+        scrollbarObject.transform.SetParent(parent, false);
+
+        RectTransform scrollbarRect = scrollbarObject.GetComponent<RectTransform>();
+        scrollbarRect.anchorMin = new Vector2(1f, 0f);
+        scrollbarRect.anchorMax = new Vector2(1f, 1f);
+        scrollbarRect.pivot = new Vector2(1f, 1f);
+        scrollbarRect.offsetMin = new Vector2(-18f, 0f);
+        scrollbarRect.offsetMax = Vector2.zero;
+
+        Image scrollbarBackground = scrollbarObject.GetComponent<Image>();
+        scrollbarBackground.color = new Color(1f, 1f, 1f, 0.22f);
+
+        GameObject slidingArea = new GameObject("Sliding Area", typeof(RectTransform));
+        slidingArea.transform.SetParent(scrollbarObject.transform, false);
+        RectTransform slidingRect = slidingArea.GetComponent<RectTransform>();
+        slidingRect.anchorMin = Vector2.zero;
+        slidingRect.anchorMax = Vector2.one;
+        slidingRect.offsetMin = new Vector2(2f, 2f);
+        slidingRect.offsetMax = new Vector2(-2f, -2f);
+
+        GameObject handle = new GameObject("Handle", typeof(RectTransform), typeof(Image));
+        handle.transform.SetParent(slidingArea.transform, false);
+        RectTransform handleRect = handle.GetComponent<RectTransform>();
+        handleRect.anchorMin = Vector2.zero;
+        handleRect.anchorMax = Vector2.one;
+        handleRect.offsetMin = Vector2.zero;
+        handleRect.offsetMax = Vector2.zero;
+
+        Image handleImage = handle.GetComponent<Image>();
+        handleImage.color = new Color(0.50f, 0.50f, 0.50f, 0.65f);
+
+        Scrollbar scrollbar = scrollbarObject.GetComponent<Scrollbar>();
+        scrollbar.direction = Scrollbar.Direction.BottomToTop;
+        scrollbar.targetGraphic = handleImage;
+        scrollbar.handleRect = handleRect;
+        scrollbar.size = 0.3f;
+
+        return scrollbar;
     }
 
     Button CreateButton(Transform parent, string name, string label, Vector2 position, Vector2 size, bool topRight)
@@ -219,7 +269,7 @@ public class AchievementPanelUI : MonoBehaviour
         rect.sizeDelta = size;
 
         Text text = obj.GetComponent<Text>();
-        text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         text.fontSize = fontSize;
         text.fontStyle = style;
         text.color = darkTextColor;
