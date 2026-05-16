@@ -22,6 +22,18 @@ public class UIManager : MonoBehaviour
     public bool isPanelOpen = false;
 
     public GameObject bankPanel;
+
+    // в”Ђв”Ђв”Ђ РџР°РЅРµР»СЊ СЃРѕР±С‹С‚РёСЏ РєРѕРЅРєСѓСЂРµРЅС‚Р° в”Ђв”Ђв”Ђ
+    public CompetitorEventPanel competitorEventPanel;
+
+    public void ShowCompetitorEvent(string competitorName, string message, bool isSabotage)
+    {
+        if (competitorEventPanel == null) return;
+
+        competitorEventPanel.Show(competitorName, message, isSabotage);
+        isPanelOpen = true;
+    }
+
     public void ShowPanel(TileType type)
     {
         HideAll();
@@ -31,7 +43,6 @@ public class UIManager : MonoBehaviour
         switch (type)
         {
             case TileType.Community:
-
                 communityPanel.SetActive(true);
                 break;
 
@@ -77,7 +88,7 @@ public class UIManager : MonoBehaviour
 
         if (playerMovement.isMoving)
         {
-            Debug.Log("Нельзя открыть во время движения");
+            Debug.Log("РќРµР»СЊР·СЏ РѕС‚РєСЂС‹С‚СЊ РІРѕ РІСЂРµРјСЏ РґРІРёР¶РµРЅРёСЏ");
             return;
         }
 
@@ -86,7 +97,7 @@ public class UIManager : MonoBehaviour
 
         if (!debtMode && playerMovement.GetCurrentTileType() != TileType.Empty)
         {
-            Debug.Log("Можно открыть только на пустой клетке");
+            Debug.Log("РњРµРЅСЋ РґРѕСЃС‚СѓРїРЅРѕ С‚РѕР»СЊРєРѕ РЅР° РїСѓСЃС‚РѕР№ РєР»РµС‚РєРµ");
             return;
         }
 
@@ -110,7 +121,6 @@ public class UIManager : MonoBehaviour
     {
         SceneManager.LoadScene("MainMenuScene");
     }
-
 
     public void ToggleJobs()
     {
@@ -139,6 +149,7 @@ public class UIManager : MonoBehaviour
             isPanelOpen = true;
         }
     }
+
     public void ToggleRealty()
     {
         if (realtyPanel.activeSelf)
@@ -173,7 +184,7 @@ public class UIManager : MonoBehaviour
 
         if (playerMovement.isMoving)
         {
-            Debug.Log("Нельзя открыть банк во время движения");
+            Debug.Log("РќРµР»СЊР·СЏ РѕС‚РєСЂС‹С‚СЊ Р±Р°РЅРє РІРѕ РІСЂРµРјСЏ РґРІРёР¶РµРЅРёСЏ");
             return;
         }
 
@@ -182,7 +193,7 @@ public class UIManager : MonoBehaviour
 
         if (!debtMode && playerMovement.GetCurrentTileType() != TileType.Empty)
         {
-            Debug.Log("Банк доступен только на пустой клетке");
+            Debug.Log("Р‘Р°РЅРє РґРѕСЃС‚СѓРїРµРЅ С‚РѕР»СЊРєРѕ РЅР° РїСѓСЃС‚РѕР№ РєР»РµС‚РєРµ");
             return;
         }
 
@@ -199,6 +210,5 @@ public class UIManager : MonoBehaviour
             !playerMovement.isMoving &&
             playerMovement.GetCurrentTileType() == TileType.Empty &&
             !isPanelOpen;
-
     }
 }

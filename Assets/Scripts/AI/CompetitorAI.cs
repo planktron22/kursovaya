@@ -15,19 +15,15 @@ public class CompetitorAI : ScriptableObject
     // Константы агрессии
     // ─────────────────────────────────────────────
 
-    // Пороги уровней агрессии (0.0 = ИИ сильнее, 1.0 = игрок доминирует)
-    private const float AggressionThresholdHelp   = 0.25f; // ниже — ИИ помогает
-    private const float AggressionThresholdLight  = 0.45f; // лёгкий саботаж
-    private const float AggressionThresholdHeavy  = 0.70f; // тяжёлый саботаж
+    private const float AggressionThresholdHelp   = 0.25f;
+    private const float AggressionThresholdLight  = 0.45f;
+    private const float AggressionThresholdHeavy  = 0.70f;
 
-    // Веса факторов при расчёте агрессии
     private const float WeightBalance = 0.60f;
     private const float WeightAssets  = 0.40f;
 
-    // Сколько активов считается "много" у игрока
     private const int AssetsConsideredMany = 4;
 
-    // Рост ИИ
     private const int MaxPassiveIncomeGrowth = 400;
     private const int MaxPassiveIncome       = 5000;
 
@@ -35,25 +31,25 @@ public class CompetitorAI : ScriptableObject
     // Ограничители бонусов игрока
     // ─────────────────────────────────────────────
 
-    private const int BonusMin = -20; // саботаж не опускает бонус ниже этого
-    private const int BonusMax =  30; // помощь не поднимает бонус выше этого
+    private const int BonusMin = -20;
+    private const int BonusMax =  30;
 
     // ─────────────────────────────────────────────
-    // Сила побочных эффектов — намеренно небольшая
+    // Сила побочных эффектов
     // ─────────────────────────────────────────────
 
-    private const int   LightPenaltyMin          = 2;
-    private const int   LightPenaltyMax          = 5;
-    private const int   LightMoodPenaltyMin      = 3;
-    private const int   LightMoodPenaltyMax      = 8;
-    private const float MediumBalancePenaltyMin  = 0.01f; // 1% от баланса
-    private const float MediumBalancePenaltyMax  = 0.03f; // 3% от баланса
-    private const int   MediumPenaltyMin         = 3;
-    private const int   MediumPenaltyMax         = 7;
-    private const float HeavyBalancePenaltyMin   = 0.03f; // 3% от баланса
-    private const float HeavyBalancePenaltyMax   = 0.07f; // 7% от баланса
-    private const int   HelpBonusMin             = 3;
-    private const int   HelpBonusMax             = 8;
+    private const int   LightPenaltyMin         = 2;
+    private const int   LightPenaltyMax         = 5;
+    private const int   LightMoodPenaltyMin     = 3;
+    private const int   LightMoodPenaltyMax     = 8;
+    private const float MediumBalancePenaltyMin = 0.01f;
+    private const float MediumBalancePenaltyMax = 0.03f;
+    private const int   MediumPenaltyMin        = 3;
+    private const int   MediumPenaltyMax        = 7;
+    private const float HeavyBalancePenaltyMin  = 0.03f;
+    private const float HeavyBalancePenaltyMax  = 0.07f;
+    private const int   HelpBonusMin            = 3;
+    private const int   HelpBonusMax            = 8;
 
     // ─────────────────────────────────────────────
     // Сообщения
@@ -85,12 +81,10 @@ public class CompetitorAI : ScriptableObject
 
     public void SimulateTurn(PlayerStats player)
     {
-        // ИИ развивается каждый ход независимо от агрессии
         balance += passiveIncome;
         int growth = Random.Range(100, MaxPassiveIncomeGrowth);
         passiveIncome = Mathf.Min(passiveIncome + growth, MaxPassiveIncome);
 
-        // Иногда ИИ сам получает негативное событие
         if (Random.value < 0.15f)
             passiveIncome = Mathf.Max(Mathf.RoundToInt(passiveIncome * 0.9f), 500);
 
@@ -99,14 +93,11 @@ public class CompetitorAI : ScriptableObject
 
         if (aggression < AggressionThresholdHelp)
         {
-            // Помощь тоже не гарантирована каждый ход — это побочный эффект
             if (Random.value < 0.35f)
                 HelpPlayer(player);
         }
         else
         {
-            // Шанс саботажа растёт с агрессией: 8% → 40%
-            // Потолок низкий намеренно — эффекты фоновые, не основные
             float sabotageChance = Mathf.Lerp(0.08f, 0.40f,
                 Mathf.InverseLerp(AggressionThresholdHelp, 1.0f, aggression));
 
@@ -116,7 +107,7 @@ public class CompetitorAI : ScriptableObject
     }
 
     // ─────────────────────────────────────────────
-    // Расчёт агрессии: 0.0 = ИИ впереди, 1.0 = игрок доминирует
+    // Расчёт агрессии
     // ─────────────────────────────────────────────
 
     private float CalculateAggression(PlayerStats player)
@@ -124,18 +115,14 @@ public class CompetitorAI : ScriptableObject
         float balanceFactor;
         if (balance <= 0)
         {
-            // ИИ банкрот — игрок всегда "впереди"
             balanceFactor = 1.0f;
         }
         else if (player.Balance <= 0)
         {
-            // Игрок в долгах — ИИ не помогает, но и не давит сильно
-            // Возвращаем нейтральное значение между Help и Light порогами
             balanceFactor = 0.30f;
         }
         else
         {
-            // Оба в плюсе — честное соотношение
             float total = (float)player.Balance + balance;
             balanceFactor = Mathf.Clamp01((float)player.Balance / total);
         }
@@ -153,6 +140,33 @@ public class CompetitorAI : ScriptableObject
             if (job.isBusiness || job.isRealty)
                 count++;
         return count;
+    }
+
+    // Проверка — есть ли у игрока хотя бы один бизнес
+    private bool HasBusiness(PlayerStats player)
+    {
+        foreach (var job in player.activeJobs)
+            if (job.isBusiness) return true;
+        return false;
+    }
+
+    // Проверка — есть ли у игрока хотя бы одна недвижимость
+    private bool HasRealty(PlayerStats player)
+    {
+        foreach (var job in player.activeJobs)
+            if (job.isRealty) return true;
+        return false;
+    }
+
+    // ─────────────────────────────────────────────
+    // Показ уведомления через UIManager
+    // ─────────────────────────────────────────────
+
+    private void ShowNotification(string message, bool isSabotage)
+    {
+        UIManager ui = Object.FindObjectOfType<UIManager>();
+        if (ui != null)
+            ui.ShowCompetitorEvent(competitorName, message, isSabotage);
     }
 
     // ─────────────────────────────────────────────
@@ -184,6 +198,7 @@ public class CompetitorAI : ScriptableObject
         }
 
         string msg = helpMessages[Random.Range(0, helpMessages.Count)];
+        ShowNotification(msg, false);
         LogEvent($"<color=green>{competitorName} (помощь): {msg}</color>");
     }
 
@@ -210,6 +225,7 @@ public class CompetitorAI : ScriptableObject
                 player.jobIncomePercentBonus = Mathf.Max(BonusMin,
                     player.jobIncomePercentBonus - Random.Range(LightPenaltyMin, LightPenaltyMax));
                 player.RecalculateIncomePublic();
+                ShowNotification(sabotageMessages[0], true);
                 LogSabotage(sabotageMessages[0]);
                 break;
 
@@ -217,6 +233,7 @@ public class CompetitorAI : ScriptableObject
                 player.Mood = Mathf.Max(0,
                     player.Mood - Random.Range(LightMoodPenaltyMin, LightMoodPenaltyMax));
                 player.UpdateUI();
+                ShowNotification(sabotageMessages[1], true);
                 LogSabotage(sabotageMessages[1]);
                 break;
         }
@@ -224,15 +241,23 @@ public class CompetitorAI : ScriptableObject
 
     private void PerformMediumSabotage(PlayerStats player)
     {
-        int type = Random.Range(0, 3);
+        // Собираем доступные типы саботажа с учётом активов игрока
+        List<int> available = new List<int> { 0 }; // удар по балансу всегда доступен
+
+        if (HasBusiness(player)) available.Add(1); // штраф к бизнесу
+        if (HasRealty(player))   available.Add(2); // штраф к недвижимости
+
+        int type = available[Random.Range(0, available.Count)];
+
         switch (type)
         {
             case 0:
                 int marketLoss = Mathf.RoundToInt(player.Balance *
                     Random.Range(MediumBalancePenaltyMin, MediumBalancePenaltyMax));
-                player.Balance -= marketLoss; // не зажимаем в 0 — CheckDebtState сам разберётся
+                player.Balance -= marketLoss;
                 player.CheckDebtState();
                 player.UpdateUI();
+                ShowNotification(sabotageMessages[2], true);
                 LogSabotage(sabotageMessages[2]);
                 break;
 
@@ -240,6 +265,7 @@ public class CompetitorAI : ScriptableObject
                 player.businessIncomePercentBonus = Mathf.Max(BonusMin,
                     player.businessIncomePercentBonus - Random.Range(MediumPenaltyMin, MediumPenaltyMax));
                 player.RecalculateIncomePublic();
+                ShowNotification(sabotageMessages[3], true);
                 LogSabotage(sabotageMessages[3]);
                 break;
 
@@ -247,32 +273,36 @@ public class CompetitorAI : ScriptableObject
                 player.realtyIncomePercentBonus = Mathf.Max(BonusMin,
                     player.realtyIncomePercentBonus - Random.Range(MediumPenaltyMin, MediumPenaltyMax));
                 player.RecalculateIncomePublic();
+                ShowNotification(sabotageMessages[4], true);
                 LogSabotage(sabotageMessages[4]);
                 break;
         }
     }
 
-    // Тяжёлый: 3–7% от баланса + небольшой штраф к бизнес-бонусу
-    // BurnRandomBusinessOrRealty убран намеренно — слишком разрушительно
     private void PerformHeavySabotage(PlayerStats player)
     {
         int heavyLoss = Mathf.RoundToInt(player.Balance *
             Random.Range(HeavyBalancePenaltyMin, HeavyBalancePenaltyMax));
-        player.Balance -= heavyLoss; // не зажимаем в 0 — CheckDebtState сам разберётся
+        player.Balance -= heavyLoss;
         player.CheckDebtState();
         player.UpdateUI();
 
-        player.businessIncomePercentBonus = Mathf.Max(BonusMin,
-            player.businessIncomePercentBonus - Random.Range(LightPenaltyMin, LightPenaltyMax));
-        player.RecalculateIncomePublic();
+        // Дополнительный штраф к бизнесу только если он есть
+        if (HasBusiness(player))
+        {
+            player.businessIncomePercentBonus = Mathf.Max(BonusMin,
+                player.businessIncomePercentBonus - Random.Range(LightPenaltyMin, LightPenaltyMax));
+            player.RecalculateIncomePublic();
+        }
 
         // Индексы 5 и 6 — тяжёлые сообщения. Если добавляешь новые — обновляй этот Range
         int msgIndex = Random.Range(5, sabotageMessages.Count);
+        ShowNotification(sabotageMessages[msgIndex], true);
         LogSabotage(sabotageMessages[msgIndex]);
     }
 
     // ─────────────────────────────────────────────
-    // UI
+    // UI текст лидерства
     // ─────────────────────────────────────────────
 
     public string GetLeaderText(PlayerStats player)
