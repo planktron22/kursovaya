@@ -35,6 +35,8 @@ public class PlayerStats : MonoBehaviour
 
     public List<PlayerBankDeal> activeBankDeals = new List<PlayerBankDeal>();
 
+    [SerializeField] private CompetitorAI competitor;
+
     private PlayerStatsInfo statsUI;
     private JobListUI jobListUI;
 
@@ -140,6 +142,8 @@ public class PlayerStats : MonoBehaviour
     {     
         Balance += NetIncome;
         RecalculateIncome();
+        
+        competitor?.SimulateTurn(this); 
 
         UpdateInvestPrices();
 
