@@ -1,9 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-
-public enum DifficultyLevel { Easy, Normal, Hard }
-
 [CreateAssetMenu(fileName = "Competitor", menuName = "Kursovaya/Competitor AI")]
 public class CompetitorAI : ScriptableObject
 {
@@ -15,56 +12,50 @@ public class CompetitorAI : ScriptableObject
     public int passiveIncome = 800;
 
 
-
     [Header("Пулы событий (назначить из Assets/Random Events)")]
     [Tooltip("Luck — «лёгкие» события для помощи игроку")]
-    public List<RandomEvent> luckEvents = new List<RandomEvent>();
+    public List<RandomEventData> luckEvents = new List<RandomEventData>();
 
     [Tooltip("UltraLuck — крупные события для помощи игроку")]
-    public List<RandomEvent> ultraLuckEvents = new List<RandomEvent>();
+    public List<RandomEventData> ultraLuckEvents = new List<RandomEventData>();
 
     [Tooltip("Unluck — стандартные негативные события")]
-    public List<RandomEvent> unluckEvents = new List<RandomEvent>();
+    public List<RandomEventData> unluckEvents = new List<RandomEventData>();
 
     [Tooltip("UltraUnluck — тяжёлые негативные события")]
-    public List<RandomEvent> ultraUnluckEvents = new List<RandomEvent>();
+    public List<RandomEventData> ultraUnluckEvents = new List<RandomEventData>();
 
 
-
-    // Шанс того, что саботаж будет использовать UltraUnluck вместо Unluck
-    private float UltraChance(DifficultyLevel d) => d switch
+    private float UltraChance(int d) => d switch
     {
-        DifficultyLevel.Easy   => 0.05f,
-        DifficultyLevel.Normal => 0.20f,
-        DifficultyLevel.Hard   => 0.45f,
-        _                      => 0.20f
+        0 => 0.05f,   // Easy
+        1 => 0.20f,   // Normal/Debug
+        2 => 0.45f,   // Hard
+        _ => 0.20f
     };
 
-    // Общий максимальный шанс саботажа
-    private float MaxSabotageChance(DifficultyLevel d) => d switch
+    private float MaxSabotageChance(int d) => d switch
     {
-        DifficultyLevel.Easy   => 0.20f,
-        DifficultyLevel.Normal => 0.40f,
-        DifficultyLevel.Hard   => 0.65f,
-        _                      => 0.40f
+        0 => 0.20f,
+        1 => 0.40f,
+        2 => 0.65f,
+        _ => 0.40f
     };
 
-    // Шанс помочь игроку при низкой агрессии
-    private float HelpChance(DifficultyLevel d) => d switch
+    private float HelpChance(int d) => d switch
     {
-        DifficultyLevel.Easy   => 0.55f,
-        DifficultyLevel.Normal => 0.35f,
-        DifficultyLevel.Hard   => 0.15f,
-        _                      => 0.35f
+        0 => 0.55f,
+        1 => 0.35f,
+        2 => 0.15f,
+        _ => 0.35f
     };
 
-    // Максимальный прирост пассивного дохода конкурента за ход
-    private int IncomeGrowthMax(DifficultyLevel d) => d switch
+    private int IncomeGrowthMax(int d) => d switch
     {
-        DifficultyLevel.Easy   => 200,
-        DifficultyLevel.Normal => 400,
-        DifficultyLevel.Hard   => 700,
-        _                      => 400
+        0 => 200,
+        1 => 400,
+        2 => 700,
+        _ => 400
     };
 
 
@@ -78,14 +69,15 @@ public class CompetitorAI : ScriptableObject
     private const int AssetsConsideredMany = 4;
     private const int MaxPassiveIncome     = 5000;
 
-
-
+    // Ограничители бонусов игрока
     private const int BonusMin = -20;
     private const int BonusMax =  30;
 
 
-    public void SimulateTurn(PlayerStats player, DifficultyLevel difficulty)
+    public void SimulateTurn(PlayerStats player)
     {
+        int difficulty = PlayerPrefs.GetInt("Difficulty", 0);
+
         // Конкурент растёт сам по себе
         balance += passiveIncome;
         int growth = Random.Range(100, IncomeGrowthMax(difficulty));
@@ -100,7 +92,6 @@ public class CompetitorAI : ScriptableObject
 
         if (aggression < AggressionThresholdHelp)
         {
-            // Конкурент «помогает» (рыночная конъюнктура) — применяем Luck-событие
             if (Random.value < HelpChance(difficulty))
                 TriggerHelpEvent(player, difficulty);
         }
@@ -117,16 +108,14 @@ public class CompetitorAI : ScriptableObject
     }
 
 
-
-    private void TriggerHelpEvent(PlayerStats player, DifficultyLevel difficulty)
+    private void TriggerHelpEvent(PlayerStats player, int difficulty)
     {
-        // На Easy иногда достаётся даже UltraLuck
-        bool useUltra = (difficulty == DifficultyLevel.Easy) && (Random.value < 0.25f);
-        List<RandomEvent> pool = (useUltra && ultraLuckEvents.Count > 0)
+        bool useUltra = (difficulty == 0) && (Random.value < 0.25f);
+        List<RandomEventData> pool = (useUltra && ultraLuckEvents.Count > 0)
             ? ultraLuckEvents
             : luckEvents;
 
-        RandomEvent ev = PickEventFromPool(pool);
+        RandomEventData ev = PickEventFromPool(pool);
         if (ev == null)
         {
             LogEvent($"[{competitorName}] Пул Luck пустой — помощь пропущена.");
@@ -144,26 +133,25 @@ public class CompetitorAI : ScriptableObject
         LogEvent($"<color=green>[{competitorName}] Помощь: {ev.title}</color>");
     }
 
-  
 
-    private void TriggerSabotageEvent(PlayerStats player, float aggression, DifficultyLevel difficulty)
+
+    private void TriggerSabotageEvent(PlayerStats player, float aggression, int difficulty)
     {
-        // При лёгкой агрессии — только Unluck, никогда Ultra
         bool canUseUltra = aggression >= AggressionThresholdHeavy;
         bool useUltra    = canUseUltra && (Random.value < UltraChance(difficulty));
 
-        List<RandomEvent> pool = (useUltra && ultraUnluckEvents.Count > 0)
+        List<RandomEventData> pool = (useUltra && ultraUnluckEvents.Count > 0)
             ? ultraUnluckEvents
             : (unluckEvents.Count > 0 ? unluckEvents : ultraUnluckEvents);
 
-        List<RandomEvent> applicable = FilterApplicable(pool, player);
+        List<RandomEventData> applicable = FilterApplicable(pool, player);
         if (applicable.Count == 0)
         {
             LogEvent($"[{competitorName}] Нет применимых событий для саботажа.");
             return;
         }
 
-        RandomEvent ev = PickWeightedEvent(applicable);
+        RandomEventData ev = PickWeightedEvent(applicable);
         if (ev == null) return;
 
         ApplyEventToPlayer(ev, player, isSabotage: true);
@@ -171,62 +159,55 @@ public class CompetitorAI : ScriptableObject
         LogSabotage(ev.title);
     }
 
-  
 
-    private void ApplyEventToPlayer(RandomEvent ev, PlayerStats player, bool isSabotage)
+    private void ApplyEventToPlayer(RandomEventData ev, PlayerStats player, bool isSabotage)
     {
         switch (ev.eventType)
         {
-            // 0 — фиксированное изменение баланса
-            case 0:
+            case RandomEventType.AddBalance:
                 int amount0 = isSabotage ? -Mathf.Abs(ev.balanceAmount) : ev.balanceAmount;
                 player.Balance += amount0;
                 player.CheckDebtState();
                 player.UpdateUI();
                 break;
 
-            // 1 — изменение настроения
-            case 1:
+            case RandomEventType.AddMood:
                 int moodDelta = isSabotage ? -Mathf.Abs(ev.moodAmount) : ev.moodAmount;
                 player.Mood = Mathf.Clamp(player.Mood + moodDelta, 0, 100);
                 player.UpdateUI();
                 break;
 
-            // 2 — изменение % зарплаты
-            case 2:
+            case RandomEventType.ChangeJobIncomePercent:
                 int salaryPct = isSabotage ? -Mathf.Abs(ev.percentAmount) : ev.percentAmount;
                 player.jobIncomePercentBonus = Mathf.Clamp(
                     player.jobIncomePercentBonus + salaryPct, BonusMin, BonusMax);
                 player.RecalculateIncomePublic();
                 break;
 
-            // 3 — изменение % дохода бизнеса
-            case 3:
+            case RandomEventType.ChangeBusinessIncomePercent:
                 int bizPct = isSabotage ? -Mathf.Abs(ev.percentAmount) : ev.percentAmount;
                 player.businessIncomePercentBonus = Mathf.Clamp(
                     player.businessIncomePercentBonus + bizPct, BonusMin, BonusMax);
                 player.RecalculateIncomePublic();
                 break;
 
-            // 4 — изменение % дохода недвижимости
-            case 4:
+            case RandomEventType.ChangeRealtyIncomePercent:
                 int realtyPct = isSabotage ? -Mathf.Abs(ev.percentAmount) : ev.percentAmount;
                 player.realtyIncomePercentBonus = Mathf.Clamp(
                     player.realtyIncomePercentBonus + realtyPct, BonusMin, BonusMax);
                 player.RecalculateIncomePublic();
                 break;
 
-            // 5 — штраф процентом от баланса (потерял бумажник)
-            case 5:
+            case RandomEventType.LoseBalancePercent:
+                // В asset «потерял бумажник» percentAmount = 15 (процент потери)
                 int loss5 = Mathf.RoundToInt(player.Balance * ev.percentAmount * 0.01f);
                 player.Balance -= Mathf.Abs(loss5);
                 player.CheckDebtState();
                 player.UpdateUI();
                 break;
 
-            // 6 — штраф баланса + временной штраф (болезнь)
-
-            case 6:
+            case RandomEventType.TemporaryMoneyAndTimePenalty:
+                // В asset «серьёзная болезнь» balanceAmount = 200000 — берём Abs, т.к. это штраф
                 player.Balance -= Mathf.Abs(ev.balanceAmount);
                 player.CheckDebtState();
                 if (ev.timePenalty > 0 && ev.durationPeriods > 0)
@@ -234,19 +215,13 @@ public class CompetitorAI : ScriptableObject
                 player.UpdateUI();
                 break;
 
-            // 7 — добавить объект недвижимости (наследство)
-            //     При саботаже — события типа 7 не используются (см. IsEventApplicable)
-            case 7:
+            case RandomEventType.AddRealty:
                 if (!isSabotage && ev.realtyToAdd != null)
-                {
-                    player.AddRealty(ev.realtyToAdd);
-                    player.RecalculateIncomePublic();
-                    player.UpdateUI();
-                }
+                    player.AddRealtyForFree(ev.realtyToAdd);
                 break;
 
-            // 8 — банковский бонус/штраф (удвоение / полудел дохода)
-            case 8:
+            case RandomEventType.ExtraPeriodIncome:
+                // Банковский бонус/сбой: меняем все доходы на +/-10%
                 int incomeBonus = isSabotage ? -10 : 10;
                 player.jobIncomePercentBonus = Mathf.Clamp(
                     player.jobIncomePercentBonus + incomeBonus, BonusMin, BonusMax);
@@ -255,26 +230,16 @@ public class CompetitorAI : ScriptableObject
                 player.RecalculateIncomePublic();
                 break;
 
-            // 9 — банкротство банка: вклады выше 1.4 млн сгорают
-            case 9:
+            case RandomEventType.BurnLargeDeposits:
+                // Банкротство банка: вклады выше страхового порога сгорают
                 if (isSabotage)
-                {
-                    const int InsuranceThreshold = 1_400_000;
-                    if (player.Balance > InsuranceThreshold)
-                        player.Balance = InsuranceThreshold;
-                    player.CheckDebtState();
-                    player.UpdateUI();
-                }
+                    player.BurnLargeDeposits(1_400_000);
                 break;
 
-            // 10 — пожар: уничтожает случайный объект недвижимости
-            case 10:
+            case RandomEventType.BurnRandomBusinessOrRealty:
+                // Пожар: уничтожает случайный актив
                 if (isSabotage)
-                {
-                    player.RemoveRandomRealty();
-                    player.RecalculateIncomePublic();
-                    player.UpdateUI();
-                }
+                    player.BurnRandomBusinessOrRealty();
                 break;
 
             default:
@@ -285,22 +250,30 @@ public class CompetitorAI : ScriptableObject
     }
 
 
-
-    private bool IsEventApplicable(RandomEvent ev, PlayerStats player)
+    private bool IsEventApplicable(RandomEventData ev, PlayerStats player)
     {
         switch (ev.eventType)
         {
-            case 3:  return HasBusiness(player);
-            case 4:  return HasRealty(player);
-            case 7:  return ev.realtyToAdd != null;
-            case 10: return HasRealty(player);
-            default: return true;
+            case RandomEventType.ChangeBusinessIncomePercent:
+                return HasBusiness(player);
+
+            case RandomEventType.ChangeRealtyIncomePercent:
+                return HasRealty(player);
+
+            case RandomEventType.AddRealty:
+                return ev.realtyToAdd != null;
+
+            case RandomEventType.BurnRandomBusinessOrRealty:
+                return HasBusiness(player) || HasRealty(player);
+
+            default:
+                return true;
         }
     }
 
-    private List<RandomEvent> FilterApplicable(List<RandomEvent> pool, PlayerStats player)
+    private List<RandomEventData> FilterApplicable(List<RandomEventData> pool, PlayerStats player)
     {
-        var result = new List<RandomEvent>();
+        var result = new List<RandomEventData>();
         foreach (var ev in pool)
             if (IsEventApplicable(ev, player))
                 result.Add(ev);
@@ -308,13 +281,13 @@ public class CompetitorAI : ScriptableObject
     }
 
 
-    private RandomEvent PickEventFromPool(List<RandomEvent> pool)
+    private RandomEventData PickEventFromPool(List<RandomEventData> pool)
     {
         if (pool == null || pool.Count == 0) return null;
         return PickWeightedEvent(pool);
     }
 
-    private RandomEvent PickWeightedEvent(List<RandomEvent> pool)
+    private RandomEventData PickWeightedEvent(List<RandomEventData> pool)
     {
         if (pool == null || pool.Count == 0) return null;
 
@@ -333,7 +306,6 @@ public class CompetitorAI : ScriptableObject
     }
 
 
-
     private float CalculateAggression(PlayerStats player)
     {
         float balanceFactor;
@@ -347,12 +319,11 @@ public class CompetitorAI : ScriptableObject
             balanceFactor = Mathf.Clamp01((float)player.Balance / total);
         }
 
-        int assetCount  = CountPlayerAssets(player);
+        int assetCount    = CountPlayerAssets(player);
         float assetFactor = Mathf.Clamp01((float)assetCount / AssetsConsideredMany);
 
         return Mathf.Clamp01(balanceFactor * WeightBalance + assetFactor * WeightAssets);
     }
-
 
 
     private int CountPlayerAssets(PlayerStats player)
@@ -378,14 +349,12 @@ public class CompetitorAI : ScriptableObject
     }
 
 
-
     private void ShowNotification(string title, string description, bool isSabotage)
     {
         UIManager ui = Object.FindObjectOfType<UIManager>();
         if (ui != null)
             ui.ShowCompetitorEvent(competitorName, $"{title}: {description}", isSabotage);
     }
-
 
 
     public string GetLeaderText(PlayerStats player)
@@ -397,7 +366,6 @@ public class CompetitorAI : ScriptableObject
         else
             return $"Вы опережаете {competitorName}";
     }
-
 
 
     private void LogSabotage(string message)
@@ -414,13 +382,14 @@ public class CompetitorAI : ScriptableObject
 #endif
     }
 
-    private void LogAggression(float aggression, DifficultyLevel difficulty)
+    private void LogAggression(float aggression, int difficulty)
     {
 #if UNITY_EDITOR
         string level = aggression < AggressionThresholdHelp  ? "НИЗКАЯ (помощь)"  :
                        aggression < AggressionThresholdLight ? "ЛЁГКАЯ"           :
                        aggression < AggressionThresholdHeavy ? "СРЕДНЯЯ"          : "ВЫСОКАЯ";
-        Debug.Log($"[{competitorName}] Сложность: {difficulty} | Агрессия: {aggression:F2} → {level}");
+        string diff  = difficulty == 0 ? "Easy" : difficulty == 2 ? "Hard" : "Normal";
+        Debug.Log($"[{competitorName}] Сложность: {diff} | Агрессия: {aggression:F2} → {level}");
 #endif
     }
 }
