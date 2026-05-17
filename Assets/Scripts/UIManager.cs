@@ -26,11 +26,11 @@ public class UIManager : MonoBehaviour
     // ─── Панель события конкурента ───
     public CompetitorEventPanel competitorEventPanel;
 
-    public void ShowCompetitorEvent(string competitorName, string message, bool isSabotage)
+    public void ShowCompetitorEvent(string competitorName, string title, string description, bool isSabotage)
     {
         if (competitorEventPanel == null) return;
 
-        competitorEventPanel.Show(competitorName, message, isSabotage);
+        competitorEventPanel.Show(competitorName, title, description, isSabotage);
         isPanelOpen = true;
     }
 
@@ -107,11 +107,11 @@ public class UIManager : MonoBehaviour
 
     public void HideAll()
     {
-        if (communityPanel) communityPanel.SetActive(false);
-        if (studyingPanel) studyingPanel.SetActive(false);
-        if (luckPanel) luckPanel.SetActive(false);
-        if (unluckPanel) unluckPanel.SetActive(false);
-        if (ultraLuckPanel) ultraLuckPanel.SetActive(false);
+        if (communityPanel)   communityPanel.SetActive(false);
+        if (studyingPanel)    studyingPanel.SetActive(false);
+        if (luckPanel)        luckPanel.SetActive(false);
+        if (unluckPanel)      unluckPanel.SetActive(false);
+        if (ultraLuckPanel)   ultraLuckPanel.SetActive(false);
         if (ultraUnluckPanel) ultraUnluckPanel.SetActive(false);
 
         isPanelOpen = false;

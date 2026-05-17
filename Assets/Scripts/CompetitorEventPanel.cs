@@ -6,20 +6,21 @@ public class CompetitorEventPanel : MonoBehaviour
 {
     [Header("Optional ready UI (оставь пустым — создастся автоматически)")]
     public GameObject panelRoot;
-    public Text       titleText;
-    public Text       messageText;
+    public Text       titleText;       // имя конкурента в шапке
+    public Text       eventTitleText;  // название события
+    public Text       descriptionText; // эффект на характеристики
     public Image      headerBackground;
     public Button     closeButton;
 
-  
+    // ─── Цвета ──────────────────────────────────────────────────────────────
     private static readonly Color ColPanelBg        = new Color(0.13f, 0.13f, 0.16f, 0.97f);
     private static readonly Color ColHeaderSabotage = new Color(0.80f, 0.18f, 0.18f, 1f);
     private static readonly Color ColHeaderHelp     = new Color(0.18f, 0.68f, 0.28f, 1f);
     private static readonly Color ColTextWhite      = new Color(0.95f, 0.95f, 0.95f, 1f);
-    private static readonly Color ColTextGray       = new Color(0.80f, 0.80f, 0.80f, 1f);
+    private static readonly Color ColEventTitle     = new Color(1.00f, 1.00f, 1.00f, 1f);
+    private static readonly Color ColDescription    = new Color(0.75f, 0.75f, 0.75f, 1f);
     private static readonly Color ColDivider        = new Color(1f,    1f,    1f,    0.10f);
     private static readonly Color ColCloseBg        = new Color(0f,    0f,    0f,    0.20f);
-
 
 
     void Start()
@@ -31,18 +32,26 @@ public class CompetitorEventPanel : MonoBehaviour
     }
 
 
-    public void Show(string competitorName, string message, bool isSabotage)
+
+    public void Show(string competitorName, string eventTitle, string description, bool isSabotage)
     {
         if (panelRoot == null) BuildUI();
 
+        // Имя конкурента в шапке с иконкой
         if (titleText != null)
             titleText.text = isSabotage
                 ? $"⚔  {competitorName}"
                 : $"✦  {competitorName}";
 
-        if (messageText != null)
-            messageText.text = message;
+        // Название события — крупно
+        if (eventTitleText != null)
+            eventTitleText.text = eventTitle;
 
+        // Эффект на характеристики — мелко серым
+        if (descriptionText != null)
+            descriptionText.text = description;
+
+        // Цвет шапки
         if (headerBackground != null)
             headerBackground.color = isSabotage ? ColHeaderSabotage : ColHeaderHelp;
 
@@ -66,7 +75,7 @@ public class CompetitorEventPanel : MonoBehaviour
         Canvas canvas = FindObjectOfType<Canvas>();
         if (canvas == null)
         {
-            Debug.LogWarning("[CompetitorEventPanel] Canvas не найден — UI не создан.");
+            Debug.LogWarning("[CompetitorEventPanel] Canvas не найден.");
             return;
         }
 
@@ -79,11 +88,11 @@ public class CompetitorEventPanel : MonoBehaviour
         rootRect.anchorMax        = new Vector2(0.5f, 0.5f);
         rootRect.pivot            = new Vector2(0.5f, 0.5f);
         rootRect.anchoredPosition = new Vector2(0f, 60f);
-        rootRect.sizeDelta        = new Vector2(430f, 158f);
+        rootRect.sizeDelta        = new Vector2(430f, 190f);
 
         panelRoot.AddComponent<Image>().color = ColPanelBg;
 
-        // ── Шапка ────────────────────────────────────────────────────────────
+        // ── Шапка 46px ───────────────────────────────────────────────────────
         GameObject header = MakeGO("Header", panelRoot.transform);
         RectTransform hRect = header.AddComponent<RectTransform>();
         hRect.anchorMin        = new Vector2(0f, 1f);
@@ -91,9 +100,8 @@ public class CompetitorEventPanel : MonoBehaviour
         hRect.pivot            = new Vector2(0.5f, 1f);
         hRect.anchoredPosition = Vector2.zero;
         hRect.sizeDelta        = new Vector2(0f, 46f);
-
         headerBackground       = header.AddComponent<Image>();
-        headerBackground.color = ColHeaderSabotage; // перезапишется в Show()
+        headerBackground.color = ColHeaderSabotage;
 
         // Имя конкурента
         titleText = MakeText("TitleText", header.transform,
@@ -101,7 +109,7 @@ public class CompetitorEventPanel : MonoBehaviour
             new Vector2(-22f, 0f), Vector2.zero,
             17, FontStyle.Bold, ColTextWhite, TextAnchor.MiddleCenter);
 
-        // Кнопка X — правый край шапки
+        // Кнопка X
         closeButton = MakeCloseButton(header.transform);
         closeButton.onClick.AddListener(Hide);
 
@@ -115,13 +123,22 @@ public class CompetitorEventPanel : MonoBehaviour
         dRect.sizeDelta        = new Vector2(0f, 1f);
         div.AddComponent<Image>().color = ColDivider;
 
-        // ── Текст события ────────────────────────────────────────────────────
-        messageText = MakeText("MessageText", panelRoot.transform,
-            new Vector2(0f, 0f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f),
-            new Vector2(0f, -24f), new Vector2(-36f, -56f),
-            14, FontStyle.Normal, ColTextGray, TextAnchor.MiddleCenter);
-        messageText.horizontalOverflow = HorizontalWrapMode.Wrap;
-        messageText.verticalOverflow   = VerticalWrapMode.Overflow;
+        // ── Название события ─────────────────────────────────────────────────
+        //    Отступ 20px сверху от разделителя, высота 36px
+        eventTitleText = MakeText("EventTitleText", panelRoot.transform,
+            new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+            new Vector2(0f, -66f), new Vector2(-32f, 36f),
+            16, FontStyle.Bold, ColEventTitle, TextAnchor.MiddleCenter);
+        eventTitleText.horizontalOverflow = HorizontalWrapMode.Wrap;
+
+        // ── Эффект на характеристики ─────────────────────────────────────────
+        //    Под названием события, высота 60px
+        descriptionText = MakeText("DescriptionText", panelRoot.transform,
+            new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f),
+            new Vector2(0f, -110f), new Vector2(-32f, 60f),
+            13, FontStyle.Normal, ColDescription, TextAnchor.MiddleCenter);
+        descriptionText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        descriptionText.verticalOverflow   = VerticalWrapMode.Overflow;
 
         Debug.Log("[CompetitorEventPanel] UI создан автоматически.");
     }
