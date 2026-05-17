@@ -1,11 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Перечисление уровней сложности — должно совпадать с тем, что объявлено
-// в GameManager (или другом месте вашего проекта).
-// Если у вас уже есть своё enum DifficultyLevel — удалите это объявление.
-// ─────────────────────────────────────────────────────────────────────────────
+
 public enum DifficultyLevel { Easy, Normal, Hard }
 
 [CreateAssetMenu(fileName = "Competitor", menuName = "Kursovaya/Competitor AI")]
@@ -18,9 +14,7 @@ public class CompetitorAI : ScriptableObject
     public int balance       = 50000;
     public int passiveIncome = 800;
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Пулы событий — назначаются в инспекторе из папок Random Events
-    // ─────────────────────────────────────────────────────────────────────────
+
 
     [Header("Пулы событий (назначить из Assets/Random Events)")]
     [Tooltip("Luck — «лёгкие» события для помощи игроку")]
@@ -35,9 +29,7 @@ public class CompetitorAI : ScriptableObject
     [Tooltip("UltraUnluck — тяжёлые негативные события")]
     public List<RandomEvent> ultraUnluckEvents = new List<RandomEvent>();
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Параметры, зависящие от уровня сложности
-    // ─────────────────────────────────────────────────────────────────────────
+
 
     // Шанс того, что саботаж будет использовать UltraUnluck вместо Unluck
     private float UltraChance(DifficultyLevel d) => d switch
@@ -75,9 +67,6 @@ public class CompetitorAI : ScriptableObject
         _                      => 400
     };
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Константы агрессии
-    // ─────────────────────────────────────────────────────────────────────────
 
     private const float AggressionThresholdHelp  = 0.25f;
     private const float AggressionThresholdLight = 0.45f;
@@ -89,17 +78,11 @@ public class CompetitorAI : ScriptableObject
     private const int AssetsConsideredMany = 4;
     private const int MaxPassiveIncome     = 5000;
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Ограничители бонусов игрока
-    // ─────────────────────────────────────────────────────────────────────────
+
 
     private const int BonusMin = -20;
     private const int BonusMax =  30;
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Главный метод — вызывается из PlayerStats.ApplyPeriod()
-    // Принимает текущий уровень сложности из GameManager
-    // ─────────────────────────────────────────────────────────────────────────
 
     public void SimulateTurn(PlayerStats player, DifficultyLevel difficulty)
     {
@@ -133,9 +116,7 @@ public class CompetitorAI : ScriptableObject
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Помощь игроку через события из пулов Luck / UltraLuck
-    // ─────────────────────────────────────────────────────────────────────────
+
 
     private void TriggerHelpEvent(PlayerStats player, DifficultyLevel difficulty)
     {
@@ -163,9 +144,7 @@ public class CompetitorAI : ScriptableObject
         LogEvent($"<color=green>[{competitorName}] Помощь: {ev.title}</color>");
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Саботаж игрока через события из пулов Unluck / UltraUnluck
-    // ─────────────────────────────────────────────────────────────────────────
+  
 
     private void TriggerSabotageEvent(PlayerStats player, float aggression, DifficultyLevel difficulty)
     {
@@ -192,22 +171,7 @@ public class CompetitorAI : ScriptableObject
         LogSabotage(ev.title);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Применение события к игроку по его eventType
-    //
-    // eventType — справочник:
-    //   0 — фиксированное изменение баланса (balanceAmount)
-    //   1 — изменение настроения (moodAmount)
-    //   2 — изменение % зарплаты (percentAmount → jobIncomePercentBonus)
-    //   3 — изменение % дохода бизнеса (percentAmount → businessIncomePercentBonus)
-    //   4 — изменение % дохода недвижимости (percentAmount → realtyIncomePercentBonus)
-    //   5 — штраф процентом от баланса (percentAmount % → вычесть из баланса)
-    //   6 — штраф баланса + timePenalty на durationPeriods периодов (болезнь)
-    //   7 — добавить объект недвижимости (realtyToAdd)
-    //   8 — удвоение дохода / банковский бонус
-    //   9 — банкротство банка (обрезать баланс до страхового порога 1.4 млн)
-    //  10 — пожар (удалить случайный объект недвижимости)
-    // ─────────────────────────────────────────────────────────────────────────
+  
 
     private void ApplyEventToPlayer(RandomEvent ev, PlayerStats player, bool isSabotage)
     {
@@ -261,8 +225,7 @@ public class CompetitorAI : ScriptableObject
                 break;
 
             // 6 — штраф баланса + временной штраф (болезнь)
-            //     Внимание: в asset «серьёзная болезнь» balanceAmount = 200000 (положительное),
-            //     но описание говорит «минус 200.000» — поэтому берём Abs и вычитаем.
+
             case 6:
                 player.Balance -= Mathf.Abs(ev.balanceAmount);
                 player.CheckDebtState();
@@ -321,9 +284,7 @@ public class CompetitorAI : ScriptableObject
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Проверка применимости события
-    // ─────────────────────────────────────────────────────────────────────────
+
 
     private bool IsEventApplicable(RandomEvent ev, PlayerStats player)
     {
@@ -346,9 +307,6 @@ public class CompetitorAI : ScriptableObject
         return result;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Выбор события с учётом поля probability из .asset-файла
-    // ─────────────────────────────────────────────────────────────────────────
 
     private RandomEvent PickEventFromPool(List<RandomEvent> pool)
     {
@@ -374,9 +332,7 @@ public class CompetitorAI : ScriptableObject
         return pool[pool.Count - 1];
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Расчёт агрессии (насколько игрок богаче конкурента)
-    // ─────────────────────────────────────────────────────────────────────────
+
 
     private float CalculateAggression(PlayerStats player)
     {
@@ -397,9 +353,7 @@ public class CompetitorAI : ScriptableObject
         return Mathf.Clamp01(balanceFactor * WeightBalance + assetFactor * WeightAssets);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Вспомогательные методы — анализ активов игрока
-    // ─────────────────────────────────────────────────────────────────────────
+
 
     private int CountPlayerAssets(PlayerStats player)
     {
@@ -423,9 +377,7 @@ public class CompetitorAI : ScriptableObject
         return false;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Уведомление игрока через UIManager
-    // ─────────────────────────────────────────────────────────────────────────
+
 
     private void ShowNotification(string title, string description, bool isSabotage)
     {
@@ -434,9 +386,7 @@ public class CompetitorAI : ScriptableObject
             ui.ShowCompetitorEvent(competitorName, $"{title}: {description}", isSabotage);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Текст лидерства для UI
-    // ─────────────────────────────────────────────────────────────────────────
+
 
     public string GetLeaderText(PlayerStats player)
     {
@@ -448,9 +398,7 @@ public class CompetitorAI : ScriptableObject
             return $"Вы опережаете {competitorName}";
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Логирование — только в редакторе
-    // ─────────────────────────────────────────────────────────────────────────
+
 
     private void LogSabotage(string message)
     {
