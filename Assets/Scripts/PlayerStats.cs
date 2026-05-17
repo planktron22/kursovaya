@@ -445,6 +445,22 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
+    public void ApplyTimePenalty(int timePenalty, int durationPeriods)
+{
+    FreeTime -= timePenalty;
+ 
+    temporaryEffects.Add(new TemporaryEffect
+    {
+        title            = "Временный штраф",
+        remainingPeriods = durationPeriods,
+        timePenalty      = timePenalty
+    });
+ 
+    Debug.Log($"Применён временный штраф: -{timePenalty} ч. на {durationPeriods} периодов");
+ 
+    UpdateUI();
+}
+
     public PlayerInvest GetInvest(OpportunityData data)
     {
         foreach (var invest in activeInvests)
