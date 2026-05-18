@@ -6,6 +6,7 @@ public class MainMenuManager : MonoBehaviour
 {
     public GameObject mainPanel;
     public GameObject difficultyPanel;
+    public GameObject settingsPanel;
 
     public Text descriptionText;
     public Button startGameButton;
@@ -22,8 +23,16 @@ public class MainMenuManager : MonoBehaviour
         startGameButton.interactable = false;
     }
 
+    public void OpenSettings()
+    {
+        mainPanel.SetActive(false);
+        settingsPanel.SetActive(true);
+
+    }
+
     public void BackToMain()
     {
+        settingsPanel.SetActive(false);
         difficultyPanel.SetActive(false);
         mainPanel.SetActive(true);
     }

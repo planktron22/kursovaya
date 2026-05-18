@@ -3,25 +3,69 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Tiles")]
     public Transform[] tiles;
+
+    [Header("Movement")]
     public float moveSpeed = 5f;
     public int currentTile = 0;
     public bool isMoving = false;
     public float stepDelay = 0.1f;
+
+    [Header("Move Sound")]
+    public AudioSource audioSource;
+    public AudioClip stepSound;
+
+    [Range(0f, 1f)]
+    public float stepSoundVolume = 0.5f;
+
+    [Header("Period Sound")]
+    public AudioClip periodSound;
+
+    [Range(0f, 1f)]
+    public float periodSoundVolume = 0.7f;
+
+    [Header("Debug Move")]
+    public int debugSteps = 1;
+    public bool debugMove = false;
 
     private PlayerStats stats;
 
     void Start()
     {
         stats = GetComponent<PlayerStats>();
+
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+        }
+    }
+
+    void Update()
+    {
+        if (debugMove)
+        {
+            debugMove = false;
+
+            if (!isMoving)
+            {
+                Move(debugSteps);
+            }
+        }
     }
 
     public void Move(int steps)
     {
-        if (!isMoving)
+        if (isMoving)
+            return;
+
+        if (tiles == null || tiles.Length == 0)
         {
-            StartCoroutine(MoveStepByStep(steps));
+            Debug.LogError("Ќе назначены тайлы дл€ движени€ игрока");
+            return;
         }
+
+        StartCoroutine(MoveStepByStep(steps));
     }
 
     IEnumerator MoveStepByStep(int steps)
@@ -34,11 +78,15 @@ public class PlayerMovement : MonoBehaviour
 
             currentTile = (currentTile + 1) % tiles.Length;
 
-            //  год
+            // прошел полный круг
             if (previousTile == tiles.Length - 1 && currentTile == 0)
             {
                 Debug.Log("ѕройден полный круг!");
-                stats.DecreaseAge();
+
+                if (stats != null)
+                {
+                    stats.DecreaseAge();
+                }
             }
 
             Vector3 targetPos = tiles[currentTile].position;
@@ -56,12 +104,20 @@ public class PlayerMovement : MonoBehaviour
 
             transform.position = targetPos;
 
-            //  период
+            // обычный звук шага
+            PlayStepSound();
+
+            // проверка периода при прохождении клетки
             Tile tile = tiles[currentTile].GetComponent<Tile>();
 
             if (tile != null && tile.tileType == TileType.Period)
             {
-                stats.ApplyPeriod();
+                PlayPeriodSound();
+
+                if (stats != null)
+                {
+                    stats.ApplyPeriod();
+                }
             }
 
             yield return new WaitForSeconds(stepDelay);
@@ -78,8 +134,27 @@ public class PlayerMovement : MonoBehaviour
         isMoving = false;
     }
 
+    void PlayStepSound()
+    {
+        if (audioSource == null || stepSound == null)
+            return;
+
+        audioSource.PlayOneShot(stepSound, stepSoundVolume * SoundSettings.SfxVolume);
+    }
+
+    void PlayPeriodSound()
+    {
+        if (audioSource == null || periodSound == null)
+            return;
+
+        audioSource.PlayOneShot(periodSound, periodSoundVolume * SoundSettings.SfxVolume);
+    }
+
     public TileType GetCurrentTileType()
     {
+        if (tiles == null || tiles.Length == 0)
+            return TileType.Empty;
+
         Tile tile = tiles[currentTile].GetComponent<Tile>();
 
         if (tile != null)
@@ -90,28 +165,10 @@ public class PlayerMovement : MonoBehaviour
 
     public void SetCurrentTile(int tileIndex)
     {
-        currentTile = tileIndex;
+        if (tiles == null || tiles.Length == 0)
+            return;
 
-        if (tiles != null && tiles.Length > 0)
-        {
-            transform.position = tiles[currentTile].position;
-        }
-    }
-
-    [Header("Debug Move")]
-    public int debugSteps = 1;
-    public bool debugMove = false;
-
-    void Update()
-    {
-        if (debugMove)
-        {
-            debugMove = false;
-
-            if (!isMoving)
-            {
-                Move(debugSteps);
-            }
-        }
+        currentTile = Mathf.Clamp(tileIndex, 0, tiles.Length - 1);
+        transform.position = tiles[currentTile].position;
     }
 }

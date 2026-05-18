@@ -40,6 +40,8 @@ public class PlayerStats : MonoBehaviour
     private PlayerStatsInfo statsUI;
     private JobListUI jobListUI;
 
+    private PeriodPopupSpawner popupSpawner;
+
     void Start()
     {
         statsUI = FindObjectOfType<PlayerStatsInfo>();
@@ -57,8 +59,11 @@ public class PlayerStats : MonoBehaviour
             InitializeInvests();
         }
 
+        popupSpawner = GetComponent<PeriodPopupSpawner>();
+
         RecalculateIncome();
         UpdateUI();
+
     }
 
     void ApplyDifficulty()
@@ -143,7 +148,13 @@ public class PlayerStats : MonoBehaviour
         Balance += NetIncome;
         RecalculateIncome();
         
-        competitor?.SimulateTurn(this); 
+        competitor?.SimulateTurn(this);
+
+        if (popupSpawner != null)
+        {
+            popupSpawner.ShowPeriodPopup(NetIncome);
+        }
+
 
         UpdateInvestPrices();
 
