@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
@@ -23,6 +24,31 @@ public class UIManager : MonoBehaviour
     public bool isPanelOpen = false;
 
     public GameObject bankPanel;
+
+    [Header("Luck Event Texts")]
+    public Text luckTitleText;
+    public Text luckDescriptionText;
+
+    public Text unluckTitleText;
+    public Text unluckDescriptionText;
+
+    public Text ultraLuckTitleText;
+    public Text ultraLuckDescriptionText;
+
+    public Text ultraUnluckTitleText;
+    public Text ultraUnluckDescriptionText;
+
+    [Header("Event Colors")]
+    public Color goodEventColor = new Color(0.2f, 0.8f, 0.3f);
+    public Color badEventColor = new Color(0.9f, 0.2f, 0.2f);
+
+    [Header("Community Texts")]
+    public Text communityResultTitleText;
+    public Text communityResultDescriptionText;
+
+    [Header("Community Colors")]
+    public Color communitySuccessColor = new Color(0.2f, 0.8f, 0.3f);
+    public Color communityFailColor = new Color(0.9f, 0.2f, 0.2f);
 
     // ─── Панель события конкурента ───
     public CompetitorEventPanel competitorEventPanel;
@@ -214,6 +240,82 @@ public class UIManager : MonoBehaviour
 
         bankPanel.SetActive(!bankPanel.activeSelf);
         isPanelOpen = bankPanel.activeSelf;
+    }
+
+    public void ShowRandomEventInfo(TileType tileType, string title, string description)
+    {
+        switch (tileType)
+        {
+            case TileType.Luck:
+                if (luckTitleText != null)
+                {
+                    luckTitleText.text = title;
+                    luckTitleText.color = goodEventColor;
+                }
+
+                if (luckDescriptionText != null)
+                    luckDescriptionText.text = description;
+
+                break;
+
+            case TileType.Unluck:
+                if (unluckTitleText != null)
+                {
+                    unluckTitleText.text = title;
+                    unluckTitleText.color = badEventColor;
+                }
+
+                if (unluckDescriptionText != null)
+                    unluckDescriptionText.text = description;
+
+                break;
+
+            case TileType.UltraLuck:
+                if (ultraLuckTitleText != null)
+                {
+                    ultraLuckTitleText.text = title;
+                    ultraLuckTitleText.color = goodEventColor;
+                }
+
+                if (ultraLuckDescriptionText != null)
+                    ultraLuckDescriptionText.text = description;
+
+                break;
+
+            case TileType.UltraUnluck:
+                if (ultraUnluckTitleText != null)
+                {
+                    ultraUnluckTitleText.text = title;
+                    ultraUnluckTitleText.color = badEventColor;
+                }
+
+                if (ultraUnluckDescriptionText != null)
+                    ultraUnluckDescriptionText.text = description;
+
+                break;
+        }
+    }
+
+    public void ShowCommunityResult(bool success, string personName)
+    {
+        if (communityResultTitleText != null)
+        {
+            if (success)
+            {
+                communityResultTitleText.text = "Успешное знакомство";
+                communityResultTitleText.color = communitySuccessColor;
+            }
+            else
+            {
+                communityResultTitleText.text = "Знакомство не удалось";
+                communityResultTitleText.color = communityFailColor;
+            }
+        }
+
+        if (communityResultDescriptionText != null)
+        {
+            communityResultDescriptionText.text = personName;
+        }
     }
 
     void Update()

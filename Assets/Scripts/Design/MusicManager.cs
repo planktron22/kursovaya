@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class MusicManager : MonoBehaviour
 {
@@ -22,12 +21,8 @@ public class MusicManager : MonoBehaviour
 
         if (musicSource == null)
             musicSource = GetComponent<AudioSource>();
-    }
 
-    void Start()
-    {
         float savedVolume = PlayerPrefs.GetFloat(MusicVolumeKey, 0.3f);
-
         musicSource.volume = savedVolume;
 
         if (!musicSource.isPlaying)
@@ -36,16 +31,20 @@ public class MusicManager : MonoBehaviour
 
     public void SetVolume(float value)
     {
+        if (musicSource == null)
+            return;
+
         musicSource.volume = value;
 
         PlayerPrefs.SetFloat(MusicVolumeKey, value);
         PlayerPrefs.Save();
-
-        Debug.Log("Громкость музыки: " + value);
     }
 
     public float GetVolume()
     {
+        if (musicSource == null)
+            return PlayerPrefs.GetFloat(MusicVolumeKey, 0.3f);
+
         return musicSource.volume;
     }
 }

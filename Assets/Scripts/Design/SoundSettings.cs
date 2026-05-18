@@ -16,8 +16,6 @@ public static class SoundSettings
 
             PlayerPrefs.SetFloat(SfxVolumeKey, clampedValue);
             PlayerPrefs.Save();
-
-            Debug.Log("Громкость эффектов: " + clampedValue);
         }
     }
 }

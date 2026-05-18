@@ -801,6 +801,8 @@ public class PlayerStats : MonoBehaviour
 
     public void TryMeetRandomPerson()
     {
+        UIManager ui = FindObjectOfType<UIManager>();
+
         if (opportunityDatabase == null)
         {
             Debug.LogError("OpportunityDatabase не найден");
@@ -816,6 +818,12 @@ public class PlayerStats : MonoBehaviour
         if (FreeTime < 5)
         {
             Debug.Log("Недостаточно свободного времени для знакомства. Нужно 5 ч.");
+
+            if (ui != null)
+            {
+                ui.ShowCommunityResult(false, "Недостаточно свободного времени");
+            }
+
             return;
         }
 
@@ -825,9 +833,22 @@ public class PlayerStats : MonoBehaviour
             Random.Range(0, opportunityDatabase.people.Length)
         ];
 
+        if (person == null)
+        {
+            Debug.LogError("В массиве people есть пустой элемент");
+            UpdateUI();
+            return;
+        }
+
         if (knownPeople.Contains(person))
         {
             Debug.Log("Вы уже знакомы с: " + person.personName);
+
+            if (ui != null)
+            {
+                ui.ShowCommunityResult(true, person.personName + " уже знаком с вами");
+            }
+
             UpdateUI();
             return;
         }
@@ -850,10 +871,20 @@ public class PlayerStats : MonoBehaviour
             knownPeople.Add(person);
 
             Debug.Log("Успешное знакомство: " + person.personName);
+
+            if (ui != null)
+            {
+                ui.ShowCommunityResult(true, person.personName);
+            }
         }
         else
         {
             Debug.Log("Знакомство не удалось: " + person.personName);
+
+            if (ui != null)
+            {
+                ui.ShowCommunityResult(false, person.personName);
+            }
         }
 
         UpdateUI();

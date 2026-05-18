@@ -30,6 +30,9 @@ public class CompetitorAI : ScriptableObject
     private int  stepsSinceReset = 0;
     private int  startBalance    = -1;   // запоминаем при первом вызове
 
+    private bool hadEventThisLap = false;
+
+
     // ─────────────────────────────────────────────────────────────────────────
     // Главный метод — вызывается из PlayerMovement когда игрок встал на Empty
     // ─────────────────────────────────────────────────────────────────────────
@@ -252,3 +255,4 @@ public class CompetitorAI : ScriptableObject
 #endif
     }
 }
+

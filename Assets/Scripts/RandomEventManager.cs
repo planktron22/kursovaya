@@ -24,6 +24,17 @@ public class RandomEventManager : MonoBehaviour
         }
 
         ApplyEvent(selectedEvent);
+
+        UIManager ui = FindObjectOfType<UIManager>();
+
+        if (ui != null)
+        {
+            ui.ShowRandomEventInfo(
+                tileType,
+                selectedEvent.title,
+                selectedEvent.description
+            );
+        }
     }
 
     RandomEventData[] GetEventsByTile(TileType tileType)
