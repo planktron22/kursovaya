@@ -30,7 +30,9 @@ public class CompetitorAI : ScriptableObject
     private int  stepsSinceReset = 0;
     private int  startBalance    = -1;   // запоминаем при первом вызове
 
-
+    // ─────────────────────────────────────────────────────────────────────────
+    // Главный метод — вызывается из PlayerMovement когда игрок встал на Empty
+    // ─────────────────────────────────────────────────────────────────────────
     public void SimulateTurn(PlayerStats player)
     {
         // Запоминаем стартовый баланс один раз
@@ -88,6 +90,7 @@ public class CompetitorAI : ScriptableObject
         ApplyEvent(ev, player, false);
         ShowNotification(ev, false);
         eventsThisLap++;
+        hadEventThisLap = true;
         Log($"<color=green>Помощь: {ev.title}</color>");
     }
 
@@ -107,6 +110,7 @@ public class CompetitorAI : ScriptableObject
         ApplyEvent(ev, player, true);
         ShowNotification(ev, true);
         eventsThisLap++;
+        hadEventThisLap = true;
         Log($"<color=red>Саботаж: {ev.title}</color>");
     }
 
