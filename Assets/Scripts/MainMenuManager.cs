@@ -45,8 +45,8 @@ public class MainMenuManager : MonoBehaviour
         descriptionText.text =
             "Лёгкая сложность:\n" +
             "- Высокий стартовый капитал\n" +
-            "- Меньше штрафов\n" +
-            "- Проще поддерживать настроение";
+            "- Много свободного времени\n" +
+            "- Вся жизнь впереди";
 
         startGameButton.interactable = true;
     }
@@ -56,9 +56,9 @@ public class MainMenuManager : MonoBehaviour
         selectedDifficulty = 1;
         descriptionText.text =
             "Средняя сложность:\n" +
-            "- Сбалансированные параметры\n" +
+            "- Есть накопления\n" +
             "- Умеренные расходы\n" +
-            "- Стандартный уровень риска";
+            "- Персонаж среднего возраста";
 
         startGameButton.interactable = true;
     }
@@ -68,7 +68,7 @@ public class MainMenuManager : MonoBehaviour
         selectedDifficulty = 2;
         descriptionText.text =
             "Высокая сложность:\n" +
-            "- Низкий стартовый капитал\n" +
+            "- Финансовое положение оставляет желать лучшего\n" +
             "- Высокие расходы\n" +
             "- Быстро падает настроение и здоровье";
 

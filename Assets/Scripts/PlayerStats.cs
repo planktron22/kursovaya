@@ -73,23 +73,23 @@ public class PlayerStats : MonoBehaviour
         switch (difficulty)
         {
             case 0:
-                Balance = 500000;
+                Balance = 5000000;
                 Loss = 55000;
                 FreeTime = 500;
                 Age = 40;
                 break;
 
             case 1:
-                Balance = 10000000;   // тестовая
+                Balance = 3000000;   
                 Loss = 45000;
-                FreeTime = 500;
+                FreeTime = 350;
                 Age = 30;
                 break;
 
             case 2:
                 Balance = 150000;
                 Loss = 50000;
-                FreeTime = 500;
+                FreeTime = 200;
                 Age = 25;
                 break;
         }

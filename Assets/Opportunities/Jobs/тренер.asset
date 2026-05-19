@@ -13,10 +13,9 @@ MonoBehaviour:
   m_Name: "\u0442\u0440\u0435\u043D\u0435\u0440"
   m_EditorClassIdentifier: 
   title: "\u0424\u0438\u0442\u043D\u0435\u0441-\u0442\u0440\u0435\u043D\u0435\u0440"
-  description: "\u041D\u0443\u0436\u0435\u043D \u0441\u0435\u0440\u0442\u0438\u0444\u0438\u043A\u0430\u0442
-    \u0438 \u0417\u041E\u0416"
+  description: "\u0422\u0440\u0435\u0431\u0443\u0435\u0442\u0441\u044F \u0441\u0435\u0440\u0442\u0438\u0444\u0438\u043A\u0430\u0442"
   type: 0
-  requiredSkill: {fileID: 0}
+  requiredSkill: {fileID: 11400000, guid: 6a6b66aa068467c4bb65b4e8c987cf79, type: 2}
   requiredPerson: {fileID: 0}
   id: job_coach
   jobIncomePerHour: 800

@@ -10,14 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4cebfda0ac092cf44b8874c84d5576b3, type: 3}
-  m_Name: "\u0431\u0438\u0437\u043D\u0435\u0441-\u0430\u043D\u0430\u043B\u0438\u0437"
+  m_Name: "\u0431\u0438\u0437\u043D\u0435\u0441-\u0430\u043D\u0430\u043B\u0438\u0437
+    2"
   m_EditorClassIdentifier: 
   title: "\u0411\u0438\u0437\u043D\u0435\u0441-\u0430\u043D\u0430\u043B\u0438\u0437
-    1 \u0443\u0440."
-  description: "\u0411\u0430\u0437\u043E\u0432\u044B\u0435 \u0437\u043D\u0430\u043D\u0438\u044F
-    \u043E \u0432\u0435\u0434\u0435\u043D\u0438\u0438 \u0431\u0438\u0437\u043D\u0435\u0441\u0430"
+    3 \u0443\u0440."
+  description: "\u042D\u043A\u0441\u043F\u0435\u0440\u0442 \u043F\u043E \u0432\u0435\u0434\u0435\u043D\u0438\u044E
+    \u0431\u0438\u0437\u043D\u0435\u0441\u0430"
   requiredSkill: {fileID: 0}
   studyCost: 30000
   studyTimeCost: 25
   studyPeriods: 4
-  id: skill_business_analyze1
+  id: skill_business_analyze3

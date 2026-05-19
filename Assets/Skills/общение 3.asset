@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: "\u043E\u0431\u0449\u0435\u043D\u0438\u0435 3"
   m_EditorClassIdentifier: 
   title: "\u041E\u0431\u0449\u0435\u043D\u0438\u0435 3 \u0443\u0440."
-  description: ----
+  description: "\u042D\u043A\u0441\u043F\u0435\u0440\u0442 \u043F\u043E \u043E\u0431\u0449\u0435\u043D\u0438\u044E
+    \u0441 \u043B\u044E\u0434\u044C\u043C\u0438"
   requiredSkill: {fileID: 11400000, guid: 4487208376bbf7c4c9137aa5d56526c6, type: 2}
   studyCost: 120000
   studyTimeCost: 50

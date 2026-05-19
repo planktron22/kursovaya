@@ -113,7 +113,7 @@ public class PlayerStatsInfo : MonoBehaviour
 
         CreateInfoItem(lossContainer, "Налоги - " + Format(stats.TaxLoss) + " р.");
         CreateInfoItem(lossContainer, "Аренда жилья - " + Format(stats.rentLoss) + " р.");
-        CreateInfoItem(lossContainer, "Потребительская корзина - " + Format(stats.foodLoss) + " р.");
+        CreateInfoItem(lossContainer, "Потр. корзина - " + Format(stats.foodLoss) + " р.");
     }
 
     void CreateInfoItem(Transform parent, string textValue)
