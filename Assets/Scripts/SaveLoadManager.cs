@@ -81,6 +81,11 @@ public class SaveLoadManager : MonoBehaviour
             });
         }
 
+        if (AchievementManager.Instance != null)
+        {
+            data.unlockedAchievementIds = AchievementManager.Instance.GetUnlockedAchievementIds();
+        }
+
         string json = JsonUtility.ToJson(data, true);
         File.WriteAllText(SavePath, json);
 

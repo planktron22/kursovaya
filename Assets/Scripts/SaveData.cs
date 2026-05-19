@@ -20,6 +20,10 @@ public class SaveData
     public List<string> learnedSkillIds = new List<string>();
     public List<string> knownPersonIds = new List<string>();
     public List<SavedBankDeal> bankDeals = new List<SavedBankDeal>();
+
+    // Достижения сохраняются вместе с конкретной партией.
+    // Новая игра начинает список заново, а загрузка восстанавливает список из save.json.
+    public List<string> unlockedAchievementIds = new List<string>();
 }
 
 [Serializable]

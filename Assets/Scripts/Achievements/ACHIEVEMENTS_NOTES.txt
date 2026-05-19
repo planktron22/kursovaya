@@ -1,0 +1,63 @@
+Achievement system notes
+========================
+
+Changed files are inside Assets/Scripts/Achievements only.
+Other gameplay scripts are not edited.
+
+How to recreate the achievement panel in the main scene:
+1. Open SampleScene.
+2. Delete the old AchievementsPanel if it is still in the scene.
+3. Use Unity menu: Tools -> Achievements -> Recreate Achievement Panel In Scene.
+4. The script will create:
+   - AchievementsButton
+   - AchievementsPanel
+   - Title
+   - CloseButton
+   - AchievementsScrollView
+   - Viewport
+   - Content
+   - AchievementItemTemplate
+   - 20 AchievementPreview rows
+
+The preview rows are visible in Edit Mode, so the designer can work without pressing Play.
+At runtime AchievementPanelUI removes AchievementPreview rows and fills the list with real achievement states from AchievementManager.
+
+Important object names:
+- AchievementsPanel
+- AchievementsButton
+- AchievementsScrollView
+- Viewport
+- Content
+- AchievementItemTemplate
+- Title
+- CloseButton
+- TitleText
+- DescriptionText
+- StatusText
+
+It is safer not to rename these objects because AchievementPanelUI searches for them by name.
+
+AI integration signals:
+Call these from the AI script later, without changing AchievementManager logic:
+
+AchievementManager.Instance?.RegisterAIHelpEvent();
+AchievementManager.Instance?.RegisterAISabotageEvent();
+AchievementManager.Instance?.RegisterAIEvent(bool isSabotage);
+
+
+New game / loaded game behavior:
+- If the player starts a new game, AchievementNewGameResetter clears achievement PlayerPrefs before SampleScene opens.
+- If the player loads a saved game, AchievementManager reads unlockedAchievementIds from save.json.
+- SaveLoadManager writes the currently unlocked achievement ids into SaveData when the game is saved.
+
+Files touched for this behavior:
+- Assets/Scripts/Achievements/AchievementManager.cs
+- Assets/Scripts/Achievements/AchievementNewGameResetter.cs
+- Assets/Scripts/SaveData.cs
+- Assets/Scripts/SaveLoadManager.cs
+
+
+UPDATE: New game reset fix
+- AchievementManager now resets achievements in Awake when SaveLoadManager.loadGameOnStart is false.
+- This means the reset no longer depends only on the main-menu button listener.
+- Loading a saved game still restores unlocked achievements from save.json.

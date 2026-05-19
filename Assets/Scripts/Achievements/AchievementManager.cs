@@ -27,7 +27,10 @@ public class AchievementManager : MonoBehaviour
         "first_skill",
         "first_person",
         "first_deposit",
-        "first_credit"
+        "first_credit",
+        "ai_first_event",
+        "ai_first_help",
+        "ai_first_sabotage"
     };
 
     [Header("Links")]
@@ -64,7 +67,19 @@ public class AchievementManager : MonoBehaviour
 
         Instance = this;
         CreateAchievementList();
-        LoadUnlockedAchievements();
+
+        // Если игрок нажал "Загрузить игру" в главном меню, берём достижения из save.json.
+        // Если это НЕ загрузка, значит началась новая партия — достижения надо очистить прямо здесь.
+        // Так сброс не зависит от того, успел ли AchievementNewGameResetter подключиться к кнопке меню.
+        if (SaveLoadManager.loadGameOnStart)
+        {
+            LoadUnlockedAchievementsFromSaveFile();
+        }
+        else
+        {
+            ResetSavedAchievements();
+            LoadUnlockedAchievements();
+        }
     }
 
     void Start()
@@ -144,6 +159,10 @@ public class AchievementManager : MonoBehaviour
 
         Add("first_deposit", "Вкладчик", "Открыть первый банковский вклад.");
         Add("first_credit", "Кредит доверия", "Получить первый кредит в банке.");
+
+        Add("ai_first_event", "ИИ вмешался", "Получить первое событие от ИИ-бота соперника.");
+        Add("ai_first_help", "Неожиданная помощь", "Получить полезное событие от ИИ-бота.");
+        Add("ai_first_sabotage", "Саботаж", "Получить вредное событие от ИИ-бота.");
     }
 
     void Add(string id, string title, string description)
@@ -346,6 +365,33 @@ public class AchievementManager : MonoBehaviour
         RefreshPanel();
     }
 
+
+    /// <summary>
+    /// Точка связи достижений с ИИ-ботом.
+    /// Ее можно вызвать из CompetitorAI после выбора события, не меняя внутреннюю логику достижений.
+    /// isSabotage = true  — ИИ навредил игроку.
+    /// isSabotage = false — ИИ помог игроку.
+    /// </summary>
+    public void RegisterAIEvent(bool isSabotage)
+    {
+        Unlock("ai_first_event");
+
+        if (isSabotage)
+            Unlock("ai_first_sabotage");
+        else
+            Unlock("ai_first_help");
+    }
+
+    public void RegisterAIHelpEvent()
+    {
+        RegisterAIEvent(false);
+    }
+
+    public void RegisterAISabotageEvent()
+    {
+        RegisterAIEvent(true);
+    }
+
     public AchievementInfo GetAchievement(string id)
     {
         foreach (AchievementInfo achievement in achievements)
@@ -373,6 +419,60 @@ public class AchievementManager : MonoBehaviour
     public int GetTotalCount()
     {
         return achievements.Count;
+    }
+
+    public List<string> GetUnlockedAchievementIds()
+    {
+        List<string> unlockedIds = new List<string>();
+
+        foreach (AchievementInfo achievement in achievements)
+        {
+            if (achievement.unlocked)
+                unlockedIds.Add(achievement.id);
+        }
+
+        return unlockedIds;
+    }
+
+    public void LoadUnlockedAchievementsFromIds(List<string> unlockedIds)
+    {
+        HashSet<string> unlockedSet = new HashSet<string>();
+
+        if (unlockedIds != null)
+        {
+            foreach (string id in unlockedIds)
+            {
+                if (!string.IsNullOrEmpty(id))
+                    unlockedSet.Add(id);
+            }
+        }
+
+        foreach (AchievementInfo achievement in achievements)
+        {
+            bool isUnlocked = unlockedSet.Contains(achievement.id);
+            achievement.unlocked = isUnlocked;
+
+            if (isUnlocked)
+                PlayerPrefs.SetInt(GetPrefsKey(achievement.id), 1);
+            else
+                PlayerPrefs.DeleteKey(GetPrefsKey(achievement.id));
+        }
+
+        PlayerPrefs.Save();
+        RefreshPanel();
+    }
+
+    void LoadUnlockedAchievementsFromSaveFile()
+    {
+        SaveData data = SaveLoadManager.LoadSaveFile();
+
+        if (data == null)
+        {
+            LoadUnlockedAchievements();
+            return;
+        }
+
+        LoadUnlockedAchievementsFromIds(data.unlockedAchievementIds);
     }
 
     public void ResetAchievements()
